@@ -1,0 +1,18 @@
+:root {
+  --bg: #0E1110;
+  --surface: #151A18;
+  --card: #1A211E;
+  --card-hover: #222A26;
+  --green: #6FCF68;
+  --green-dark: #2E6B3C;
+  --green-soft: rgba(111, 207, 104, 0.12);
+  --gold: #D8B45A;
+  --gold-light: #F1D78A;
+  --gold-soft: rgba(216, 180, 90, 0.12);
+  --text: #F3F4F2;
+  --text-secondary: #A8B0AA;
+  --border: rgba(111, 207, 104, 0.15);
+  --glass: rgba(24, 33, 30, 0.82);
+  --success: #6FCF68;
+  --warning: #D8B45A;
+}
