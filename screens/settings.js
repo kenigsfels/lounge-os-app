@@ -1,4 +1,5 @@
 import { renderBackupManager, initBackupManager } from '../components/backup-manager.js';
+import { renderCloudManager, initCloudManager } from '../components/cloud-manager.js';
 
 export function renderSettingsScreen() {
   return `
@@ -12,9 +13,18 @@ export function renderSettingsScreen() {
         ${renderBackupManager()}
         <p class="backup-warning">Резервные копии хранятся на вашем устройстве. Регулярно скачивайте JSON-файл и храните его отдельно.</p>
       </section>
+      <section class="settings-card glass-panel" aria-labelledby="cloudTitle">
+        <header><p class="overline">Синхронизация</p><h2 id="cloudTitle">Supabase Cloud</h2></header>
+        ${renderCloudManager()}
+      </section>
     </section>`;
 }
 
 export function initSettingsScreen(root, options) {
-  return initBackupManager(root, options);
+  const cleanupBackup = initBackupManager(root, options);
+  const cleanupCloud = initCloudManager(root, options);
+  return () => {
+    cleanupBackup?.();
+    cleanupCloud?.();
+  };
 }

@@ -132,3 +132,12 @@ export function seedEmployees() {
 export function clearEmployees() {
   return removeStorage(EMPLOYEES_STORAGE_KEY);
 }
+
+export function replaceEmployees(employees) {
+  try {
+    if (!Array.isArray(employees)) return false;
+    return saveEmployees(employees);
+  } catch {
+    return false;
+  }
+}

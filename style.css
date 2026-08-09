@@ -1,6 +1,6 @@
-@import url('./styles/variables.css?v=0.2.1');
-@import url('./styles/base.css?v=0.2.1');
-@import url('./styles/layout.css?v=0.2.1');
-@import url('./styles/components.css?v=0.2.1');
-@import url('./styles/screens.css?v=0.2.1');
-@import url('./styles/responsive.css?v=0.2.1');
+@import url('./styles/variables.css');
+@import url('./styles/base.css');
+@import url('./styles/layout.css');
+@import url('./styles/components.css');
+@import url('./styles/screens.css');
+@import url('./styles/responsive.css');

@@ -18,7 +18,8 @@ const {
   createEmployee,
   updateEmployee,
   deleteEmployee,
-  clearEmployees
+  clearEmployees,
+  replaceEmployees
 } = await import('../core/employees.js');
 
 const STORAGE_KEY = 'lounge_os_employees';
@@ -57,6 +58,9 @@ try {
 
   assert(deleteEmployee(created.employee.id), 'сотрудник удалён');
   assert(getEmployees().length === 0, 'после удаления база пуста');
+
+  assert(replaceEmployees([{ id: 'cloud-1', name: 'Из облака' }]), 'облачный список записан локально');
+  assert(getEmployees()[0].id === 'cloud-1', 'облачный список доступен через ядро сотрудников');
 
   console.log(`\nВсе тесты пройдены: ${passed}`);
 } catch (error) {

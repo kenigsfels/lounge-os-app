@@ -1,15 +1,15 @@
-import { renderHeader, initHeader } from './components/header.js?v=0.2.1';
-import { renderDock, initDock, dockItems } from './components/dock.js?v=0.2.1';
-import { renderToast, createToast } from './components/toast.js?v=0.2.1';
-import { renderDashboardScreen } from './screens/dashboard.js?v=0.2.1';
-import { renderEmployeesScreen, initEmployeesScreen } from './screens/employees.js?v=0.2.1';
-import { renderScheduleScreen } from './screens/schedule.js?v=0.2.1';
-import { renderSalaryScreen } from './screens/salary.js?v=0.2.1';
-import { renderWarehouseScreen } from './screens/warehouse.js?v=0.2.1';
-import { renderKnowledgeScreen } from './screens/knowledge.js?v=0.2.1';
-import { renderTrainingScreen } from './screens/training.js?v=0.2.1';
-import { renderTasksScreen } from './screens/tasks.js?v=0.2.1';
-import { renderSettingsScreen, initSettingsScreen } from './screens/settings.js?v=0.2.1';
+import { renderHeader, initHeader } from './components/header.js';
+import { renderDock, initDock, dockItems } from './components/dock.js';
+import { renderToast, createToast } from './components/toast.js';
+import { renderDashboardScreen } from './screens/dashboard.js';
+import { renderEmployeesScreen, initEmployeesScreen } from './screens/employees.js';
+import { renderScheduleScreen } from './screens/schedule.js';
+import { renderSalaryScreen } from './screens/salary.js';
+import { renderWarehouseScreen } from './screens/warehouse.js';
+import { renderKnowledgeScreen } from './screens/knowledge.js';
+import { renderTrainingScreen } from './screens/training.js';
+import { renderTasksScreen } from './screens/tasks.js';
+import { renderSettingsScreen, initSettingsScreen } from './screens/settings.js';
 
 const screens = {
   dashboard: renderDashboardScreen,

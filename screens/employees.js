@@ -4,6 +4,11 @@ import {
   updateEmployee,
   deleteEmployee
 } from '../core/employees.js';
+import {
+  deleteEmployeeFromCloud,
+  saveEmployeeToCloud,
+  synchronizeEmployees
+} from '../core/cloud-sync.js';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -156,6 +161,9 @@ export function initEmployeesScreen(root, { showToast = () => {} } = {}) {
       if (deleteEmployee(employee.id)) {
         refresh();
         showToast('Сотрудник удалён');
+        deleteEmployeeFromCloud(employee.id).catch(() => {
+          showToast('Удалено локально; облако временно недоступно');
+        });
       }
     }
   });
@@ -175,5 +183,14 @@ export function initEmployeesScreen(root, { showToast = () => {} } = {}) {
     dialog.close();
     refresh();
     showToast(data.employeeId ? 'Данные сотрудника обновлены' : 'Сотрудник добавлен');
+    saveEmployeeToCloud(result.employee).catch(() => {
+      showToast('Сохранено локально; облако временно недоступно');
+    });
   });
+
+  synchronizeEmployees()
+    .then((result) => {
+      if (result.connected) refresh();
+    })
+    .catch(() => {});
 }
