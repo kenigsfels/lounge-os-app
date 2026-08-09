@@ -1,15 +1,15 @@
-import { renderHeader, initHeader } from './components/header.js';
-import { renderDock, initDock, dockItems } from './components/dock.js';
-import { renderToast, createToast } from './components/toast.js';
-import { renderDashboardScreen } from './screens/dashboard.js';
-import { renderEmployeesScreen } from './screens/employees.js';
-import { renderScheduleScreen } from './screens/schedule.js';
-import { renderSalaryScreen } from './screens/salary.js';
-import { renderWarehouseScreen } from './screens/warehouse.js';
-import { renderKnowledgeScreen } from './screens/knowledge.js';
-import { renderTrainingScreen } from './screens/training.js';
-import { renderTasksScreen } from './screens/tasks.js';
-import { renderSettingsScreen, initSettingsScreen } from './screens/settings.js';
+import { renderHeader, initHeader } from './components/header.js?v=0.2.1';
+import { renderDock, initDock, dockItems } from './components/dock.js?v=0.2.1';
+import { renderToast, createToast } from './components/toast.js?v=0.2.1';
+import { renderDashboardScreen } from './screens/dashboard.js?v=0.2.1';
+import { renderEmployeesScreen, initEmployeesScreen } from './screens/employees.js?v=0.2.1';
+import { renderScheduleScreen } from './screens/schedule.js?v=0.2.1';
+import { renderSalaryScreen } from './screens/salary.js?v=0.2.1';
+import { renderWarehouseScreen } from './screens/warehouse.js?v=0.2.1';
+import { renderKnowledgeScreen } from './screens/knowledge.js?v=0.2.1';
+import { renderTrainingScreen } from './screens/training.js?v=0.2.1';
+import { renderTasksScreen } from './screens/tasks.js?v=0.2.1';
+import { renderSettingsScreen, initSettingsScreen } from './screens/settings.js?v=0.2.1';
 
 const screens = {
   dashboard: renderDashboardScreen,
@@ -46,6 +46,10 @@ function startApp() {
       initSettingsScreen(workspace, { showToast });
     }
 
+    if (normalizedRoute === 'employees') {
+      initEmployeesScreen(workspace, { showToast });
+    }
+
     if (updateHistory) {
       window.history.replaceState(null, '', `#${normalizedRoute}`);
     }
@@ -60,6 +64,11 @@ function startApp() {
   });
 
   workspace.addEventListener('click', (event) => {
+    const routeLink = event.target.closest('[data-route-link]');
+    if (routeLink) {
+      navigate(routeLink.dataset.routeLink);
+      return;
+    }
     if (event.target.closest('[data-action]')) showToast('Раздел в разработке');
   });
 

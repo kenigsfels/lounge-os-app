@@ -1,5 +1,10 @@
 {
   "name": "lounge-os",
   "private": true,
-  "type": "module"
+  "version": "0.2.1",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/dev-server.js",
+    "test": "node tests/employees.test.js && node tests/backup.test.js"
+  }
 }

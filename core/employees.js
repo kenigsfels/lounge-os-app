@@ -112,9 +112,9 @@ export function seedEmployees() {
     if (getEmployees().length > 0) return getEmployees();
 
     const seeds = [
-      { name: 'Юрий', position: 'Основной' },
-      { name: 'Кристина', position: 'Саппорт' },
-      { name: 'Женя', position: 'Администратор' }
+      { name: 'Сотрудник 1', position: 'Основной' },
+      { name: 'Сотрудник 2', position: 'Саппорт' },
+      { name: 'Сотрудник 3', position: 'Администратор' }
     ];
     const created = [];
 

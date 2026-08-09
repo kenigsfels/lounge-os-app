@@ -5,7 +5,7 @@ const APP_PREFIX = 'lounge_os_';
 const SNAPSHOTS_KEY = 'lounge_os_local_snapshots';
 const SNAPSHOTS_STORAGE_NAME = 'local_snapshots';
 const APP_NAME = 'Lounge OS';
-const APP_VERSION = '0.1.0';
+const APP_VERSION = '0.2.1';
 const FORMAT_VERSION = 1;
 const MAX_LOCAL_SNAPSHOTS = 10;
 

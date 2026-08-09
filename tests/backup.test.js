@@ -49,7 +49,7 @@ function getJson(key) { return JSON.parse(localStorage.getItem(key)); }
 
 try {
   localStorage.setItem('foreign_app_token', 'keep-me');
-  setJson('lounge_os_employees', [{ id: 'e1', name: 'Юрий', position: 'Основной' }]);
+  setJson('lounge_os_employees', [{ id: 'e1', name: 'Сотрудник 1', position: 'Основной' }]);
   setJson('lounge_os_preferences', { compact: true });
   setJson('lounge_os_local_snapshots', [{ id: 'must-not-be-nested' }]);
 
