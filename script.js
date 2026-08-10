@@ -10,6 +10,7 @@ import { renderKnowledgeScreen } from './screens/knowledge.js';
 import { renderTrainingScreen } from './screens/training.js';
 import { renderTasksScreen } from './screens/tasks.js';
 import { renderSettingsScreen, initSettingsScreen } from './screens/settings.js';
+import { registerLoungeOsServiceWorker } from './core/pwa.js';
 
 const screens = {
   dashboard: renderDashboardScreen,
@@ -22,6 +23,8 @@ const screens = {
   tasks: renderTasksScreen,
   settings: renderSettingsScreen
 };
+
+registerLoungeOsServiceWorker();
 
 function startApp() {
   const headerRoot = document.querySelector('#headerRoot');

@@ -1,5 +1,6 @@
 import { renderBackupManager, initBackupManager } from '../components/backup-manager.js';
 import { renderCloudManager, initCloudManager } from '../components/cloud-manager.js';
+import { renderPwaManager, initPwaManager } from '../components/pwa-manager.js';
 
 export function renderSettingsScreen() {
   return `
@@ -17,14 +18,20 @@ export function renderSettingsScreen() {
         <header><p class="overline">Синхронизация</p><h2 id="cloudTitle">Supabase Cloud</h2></header>
         ${renderCloudManager()}
       </section>
+      <section class="settings-card glass-panel" aria-labelledby="mobileAppTitle">
+        <header><p class="overline">Телефон</p><h2 id="mobileAppTitle">Мобильное приложение</h2></header>
+        ${renderPwaManager()}
+      </section>
     </section>`;
 }
 
 export function initSettingsScreen(root, options) {
   const cleanupBackup = initBackupManager(root, options);
   const cleanupCloud = initCloudManager(root, options);
+  const cleanupPwa = initPwaManager(root, options);
   return () => {
     cleanupBackup?.();
     cleanupCloud?.();
+    cleanupPwa?.();
   };
 }

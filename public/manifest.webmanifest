@@ -1,0 +1,54 @@
+{
+  "id": "./",
+  "name": "LoungeOS",
+  "short_name": "LoungeOS",
+  "description": "Управление командой и операционной работой кальянной",
+  "lang": "ru",
+  "dir": "ltr",
+  "start_url": "./#dashboard",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0E1110",
+  "theme_color": "#0E1110",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Главная",
+      "short_name": "Главная",
+      "url": "./#dashboard",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "График",
+      "short_name": "График",
+      "url": "./#schedule",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Сотрудники",
+      "short_name": "Сотрудники",
+      "url": "./#employees",
+      "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
