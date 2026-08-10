@@ -5,7 +5,7 @@
 
 ## Windows-приложение
 
-Готовый установщик создаётся в `release/LoungeOS-Setup-0.5.0-x64.exe`:
+Готовый установщик создаётся в `release/LoungeOS-Setup-0.5.1-x64.exe`:
 
 ```powershell
 npm install

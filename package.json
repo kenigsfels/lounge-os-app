@@ -1,7 +1,7 @@
 {
   "name": "lounge-os",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "LoungeOS — управление командой и операционной работой кальянной",
   "author": "kenigsfels",
   "main": "electron/main.cjs",
@@ -11,7 +11,7 @@
     "desktop:dev": "node scripts/desktop-dev.cjs",
     "desktop:pack": "npm run build && electron-builder --dir --win",
     "desktop:build": "npm run build && electron-builder --win nsis",
-    "test": "node tests/employees.test.js && node tests/backup.test.js && node tests/schedule.test.js",
+    "test": "node tests/employees.test.js && node tests/backup.test.js && node tests/schedule.test.js && node tests/supabase.test.js",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 8765",
     "check": "node --check script.js"

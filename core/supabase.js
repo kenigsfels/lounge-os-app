@@ -32,11 +32,20 @@ export async function getCloudSession() {
   return data.session;
 }
 
+export function buildAuthRedirectUrl(locationHref, baseUrl) {
+  const redirectUrl = new URL(baseUrl, locationHref);
+  redirectUrl.hash = 'settings';
+  return redirectUrl.toString();
+}
+
 export async function sendMagicLink(email) {
   const supabase = getSupabaseClient();
   if (!supabase) throw new Error('Supabase ещё не настроен');
 
-  const redirectTo = `${globalThis.location.origin}${import.meta.env.BASE_URL}#settings`;
+  const redirectTo = buildAuthRedirectUrl(
+    globalThis.location.href,
+    import.meta.env.BASE_URL
+  );
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: { emailRedirectTo: redirectTo }

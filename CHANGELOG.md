@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.1] — 2026-08-10
+
+### Fixed
+
+- callback magic link теперь корректно сохраняет каталог `/lounge-os-app/` на
+  GitHub Pages при относительном `base: './'` в Vite;
+- добавлены регрессионные тесты callback URL для GitHub Pages, локального Vite
+  и абсолютного base path.
+
+### Changed
+
+- версия приложения и метаданных backup обновлена до `0.5.1`.
+
 ## [0.5.0] — 2026-08-10
 
 ### Added
