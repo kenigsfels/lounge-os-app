@@ -17,7 +17,7 @@
 - TASK-013: самостоятельное Windows-приложение, Electron-оболочка и NSIS-установщик
 - TASK-014: общий график Google Sheets, Rainmeter и desktop-приложения
 - TASK-015: production-проект Supabase, magic link и синхронизация сотрудников
-- TASK-016: облачная синхронизация графика с RLS и offline-кэшем
+- TASK-016: облачная синхронизация графика с RLS, offline-кэшем и импортом JSON
 
 ## В работе
 

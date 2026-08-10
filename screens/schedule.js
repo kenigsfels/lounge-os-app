@@ -1,7 +1,10 @@
 import {
   getCurrentWeekIndex,
+  hasScheduleData,
   loadScheduleData,
-  parseLocalDate
+  normalizeScheduleData,
+  parseLocalDate,
+  saveScheduleData
 } from '../core/schedule.js';
 import { synchronizeSchedule } from '../core/cloud-sync.js';
 
@@ -86,12 +89,16 @@ export function renderScheduleScreen() {
   return `
     <section class="view schedule-screen is-active" aria-labelledby="scheduleTitle">
       <header class="schedule-header glass-panel">
-        <div>
+        <div class="schedule-header__actions">
           <p class="overline">Планирование · Google Sheets</p>
           <h1 id="scheduleTitle">График смен</h1>
           <p>Текущая и следующие недели из рабочей таблицы.</p>
         </div>
-        <button class="schedule-source" type="button" data-schedule-source>Подключение к локальному графику…</button>
+        <div>
+          <button class="schedule-source" type="button" data-schedule-source>Подключение к локальному графику…</button>
+          <button class="backup-button" type="button" data-schedule-import-button>Импортировать JSON</button>
+          <input type="file" accept="application/json,.json" data-schedule-import hidden>
+        </div>
       </header>
       <section class="schedule-calendar glass-panel" aria-live="polite">
         <div class="schedule-toolbar">
@@ -116,6 +123,30 @@ export async function initScheduleScreen(root, { showToast }) {
   const weekRoot = root.querySelector('[data-schedule-week]');
   const range = root.querySelector('[data-schedule-range]');
   const source = root.querySelector('[data-schedule-source]');
+  const importInput = root.querySelector('[data-schedule-import]');
+  const importButton = root.querySelector('[data-schedule-import-button]');
+
+  importButton?.addEventListener('click', () => importInput?.click());
+  importInput?.addEventListener('change', async () => {
+    const file = importInput.files?.[0];
+    if (!file) return;
+
+    try {
+      const imported = normalizeScheduleData(JSON.parse(await file.text()));
+      if (!hasScheduleData(imported)) throw new Error('В файле нет недель графика');
+      saveScheduleData(imported);
+      const result = await synchronizeSchedule();
+      showToast(result.connected
+        ? 'График импортирован и отправлен в Supabase'
+        : 'График импортирован локально; войдите в облако для синхронизации');
+      globalThis.dispatchEvent(new HashChangeEvent('hashchange'));
+    } catch (error) {
+      showToast(error?.message || 'Не удалось импортировать график');
+    } finally {
+      importInput.value = '';
+    }
+  });
+
   let schedule;
   let cloudConnected = false;
 
