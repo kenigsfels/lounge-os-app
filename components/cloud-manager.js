@@ -5,7 +5,7 @@ import {
   sendMagicLink,
   signOutCloud
 } from '../core/supabase.js';
-import { synchronizeEmployees } from '../core/cloud-sync.js';
+import { synchronizeCloudData } from '../core/cloud-sync.js';
 
 export function renderCloudManager() {
   if (!isSupabaseConfigured()) {
@@ -47,7 +47,7 @@ export function initCloudManager(root, { showToast = () => {} } = {}) {
       manager.classList.toggle('is-connected', Boolean(session));
       title.textContent = session ? 'Облако подключено' : 'Требуется вход';
       description.textContent = session?.user?.email ?? 'Войдите по ссылке из email, чтобы включить синхронизацию';
-      if (session) await synchronizeEmployees();
+      if (session) await synchronizeCloudData();
     } catch (error) {
       title.textContent = 'Ошибка подключения';
       description.textContent = error?.message || 'Не удалось подключиться к Supabase';
@@ -68,9 +68,9 @@ export function initCloudManager(root, { showToast = () => {} } = {}) {
 
   manager.querySelector('[data-cloud-sync]').addEventListener('click', async () => {
     try {
-      await synchronizeEmployees();
+      await synchronizeCloudData();
       globalThis.dispatchEvent(new CustomEvent('lounge:cloud-synced'));
-      showToast('Данные синхронизированы');
+      showToast('Сотрудники и график синхронизированы');
     } catch (error) {
       showToast(error?.message || 'Ошибка синхронизации');
     }

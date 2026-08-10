@@ -1,4 +1,10 @@
 import { getEmployees, replaceEmployees } from './employees.js';
+import {
+  chooseNewestSchedule,
+  hasScheduleData,
+  loadScheduleData,
+  saveScheduleData
+} from './schedule.js';
 import { getCloudSession, getSupabaseClient, isSupabaseConfigured } from './supabase.js';
 
 function toCloudEmployee(employee, venueId, userId) {
@@ -106,4 +112,51 @@ export async function deleteEmployeeFromCloud(employeeId) {
     .eq('id', employeeId);
   if (error) throw error;
   return { success: true, connected: true };
+}
+
+export async function synchronizeSchedule() {
+  const localSchedule = await loadScheduleData();
+  const context = await getCloudContext();
+  if (!context) {
+    return { success: false, connected: false, schedule: localSchedule, source: 'local' };
+  }
+
+  const { supabase, session, membership } = context;
+  const { data: cloudRow, error } = await supabase
+    .from('schedules')
+    .select('payload, updated_at')
+    .eq('venue_id', membership.venue_id)
+    .maybeSingle();
+  if (error) throw error;
+
+  const selected = chooseNewestSchedule(
+    localSchedule,
+    cloudRow?.payload,
+    cloudRow?.updated_at
+  );
+
+  if (selected.source === 'local' && hasScheduleData(selected.schedule)) {
+    const { error: upsertError } = await supabase.from('schedules').upsert({
+      venue_id: membership.venue_id,
+      payload: selected.schedule,
+      updated_by: session.user.id
+    });
+    if (upsertError) throw upsertError;
+  }
+
+  saveScheduleData(selected.schedule);
+  return {
+    success: true,
+    connected: true,
+    schedule: selected.schedule,
+    source: selected.source
+  };
+}
+
+export async function synchronizeCloudData() {
+  const [employees, schedule] = await Promise.all([
+    synchronizeEmployees(),
+    synchronizeSchedule()
+  ]);
+  return { employees, schedule };
 }

@@ -1,7 +1,7 @@
 {
   "name": "lounge-os",
   "private": true,
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "LoungeOS — управление командой и операционной работой кальянной",
   "author": "kenigsfels",
   "main": "electron/main.cjs",

@@ -3,6 +3,7 @@ import {
   loadScheduleData,
   parseLocalDate
 } from '../core/schedule.js';
+import { synchronizeSchedule } from '../core/cloud-sync.js';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -115,7 +116,17 @@ export async function initScheduleScreen(root, { showToast }) {
   const weekRoot = root.querySelector('[data-schedule-week]');
   const range = root.querySelector('[data-schedule-range]');
   const source = root.querySelector('[data-schedule-source]');
-  const schedule = await loadScheduleData();
+  let schedule;
+  let cloudConnected = false;
+
+  try {
+    const result = await synchronizeSchedule();
+    schedule = result.schedule;
+    cloudConnected = result.connected;
+  } catch (error) {
+    schedule = await loadScheduleData();
+    showToast(error?.message || 'Облако недоступно, открыт локальный график');
+  }
 
   if (!weekRoot?.isConnected) return;
 
@@ -128,6 +139,7 @@ export async function initScheduleScreen(root, { showToast }) {
 
   let activeIndex = getCurrentWeekIndex(schedule);
   source.textContent = formatSyncTime(schedule.source?.syncedAt);
+  if (cloudConnected) source.textContent += ' · Supabase';
   source.title = schedule.source?.url || '';
   source.addEventListener('click', () => {
     if (schedule.source?.url) window.open(schedule.source.url, '_blank', 'noopener');
@@ -152,5 +164,7 @@ export async function initScheduleScreen(root, { showToast }) {
   });
 
   updateWeek();
-  showToast('График синхронизирован с Google Таблицами');
+  showToast(cloudConnected
+    ? 'График синхронизирован с Supabase'
+    : 'Открыт локальный график');
 }

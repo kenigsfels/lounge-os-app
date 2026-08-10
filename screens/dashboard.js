@@ -1,5 +1,6 @@
 import { getEmployees } from '../core/employees.js';
 import { getUpcomingDays, loadScheduleData, parseLocalDate } from '../core/schedule.js';
+import { synchronizeSchedule } from '../core/cloud-sync.js';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -50,7 +51,12 @@ export function renderDashboardScreen() {
 
 export async function initDashboardScreen(root) {
   const container = root.querySelector('[data-dashboard-shifts]');
-  const schedule = await loadScheduleData();
+  let schedule;
+  try {
+    schedule = (await synchronizeSchedule()).schedule;
+  } catch {
+    schedule = await loadScheduleData();
+  }
   if (!container?.isConnected) return;
 
   const days = getUpcomingDays(schedule);

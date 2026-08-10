@@ -1,4 +1,4 @@
-import { readStorage } from './storage.js';
+import { readStorage, writeStorage } from './storage.js';
 
 const EMPTY_SCHEDULE = Object.freeze({
   version: 1,
@@ -52,10 +52,41 @@ export function normalizeScheduleData(value) {
   };
 }
 
+export function hasScheduleData(value) {
+  return normalizeScheduleData(value).weeks.length > 0;
+}
+
+export function getScheduleTimestamp(value, fallback = '') {
+  const schedule = normalizeScheduleData(value);
+  const timestamp = Date.parse(schedule.source?.syncedAt || fallback);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+export function chooseNewestSchedule(localValue, cloudValue, cloudUpdatedAt = '') {
+  const localSchedule = normalizeScheduleData(localValue);
+  const cloudSchedule = normalizeScheduleData(cloudValue);
+  const localHasData = hasScheduleData(localSchedule);
+  const cloudHasData = hasScheduleData(cloudSchedule);
+
+  if (!cloudHasData) return { source: 'local', schedule: localSchedule };
+  if (!localHasData) return { source: 'cloud', schedule: cloudSchedule };
+
+  return getScheduleTimestamp(localSchedule) > getScheduleTimestamp(cloudSchedule, cloudUpdatedAt)
+    ? { source: 'local', schedule: localSchedule }
+    : { source: 'cloud', schedule: cloudSchedule };
+}
+
+export function saveScheduleData(value) {
+  const schedule = normalizeScheduleData(value);
+  writeStorage('schedule', schedule);
+  return schedule;
+}
+
 export async function loadScheduleData() {
   try {
     if (globalThis.loungeOS?.schedule?.load) {
-      return normalizeScheduleData(await globalThis.loungeOS.schedule.load());
+      const desktopSchedule = normalizeScheduleData(await globalThis.loungeOS.schedule.load());
+      if (hasScheduleData(desktopSchedule)) return saveScheduleData(desktopSchedule);
     }
   } catch {
     // The browser fallback below keeps the public version usable.
