@@ -1,0 +1,33 @@
+appId: com.kenigsfels.loungeos
+productName: LoungeOS
+copyright: Copyright (c) 2026 kenigsfels
+asar: true
+npmRebuild: false
+electronDist: node_modules/electron/dist
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - dist/**/*
+  - electron/**/*
+  - build/icon.png
+  - package.json
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: LoungeOS-Setup-${version}-${arch}.${ext}
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: LoungeOS
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false

@@ -1,10 +1,16 @@
 {
   "name": "lounge-os",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
+  "description": "LoungeOS — управление командой и операционной работой кальянной",
+  "author": "kenigsfels",
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "start": "vite --host 127.0.0.1 --port 8765",
+    "desktop:dev": "node scripts/desktop-dev.cjs",
+    "desktop:pack": "npm run build && electron-builder --dir --win",
+    "desktop:build": "npm run build && electron-builder --win nsis",
     "test": "node tests/employees.test.js && node tests/backup.test.js",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 8765",
@@ -14,6 +20,8 @@
     "@supabase/supabase-js": "^2.112.2"
   },
   "devDependencies": {
+    "electron": "43.3.0",
+    "electron-builder": "26.15.3",
     "vite": "^8.2.1"
   }
 }
