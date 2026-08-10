@@ -1,4 +1,5 @@
 import { getEmployees } from '../core/employees.js';
+import { getUpcomingDays, loadScheduleData, parseLocalDate } from '../core/schedule.js';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -33,7 +34,7 @@ export function renderDashboardScreen() {
         </article>
         <article class="widget glass-panel">
           <header class="widget__header"><div><span class="widget__icon icon-violet">⌁</span><h2>Ближайшие смены</h2></div><button class="text-button" type="button" data-route-link="schedule">Открыть</button></header>
-          <div class="empty-state"><span>○</span><strong>Смен пока нет</strong><p>Добавьте первую смену в график</p></div>
+          <div class="empty-state" data-dashboard-shifts><span>○</span><strong>Загружаю график</strong><p>Проверяю ближайшие смены</p></div>
         </article>
         <article class="widget glass-panel">
           <header class="widget__header"><div><span class="widget__icon icon-amber">!</span><h2>Требует внимания</h2></div><span class="counter">0</span></header>
@@ -45,4 +46,24 @@ export function renderDashboardScreen() {
         </article>
       </div>
     </section>`;
+}
+
+export async function initDashboardScreen(root) {
+  const container = root.querySelector('[data-dashboard-shifts]');
+  const schedule = await loadScheduleData();
+  if (!container?.isConnected) return;
+
+  const days = getUpcomingDays(schedule);
+  if (days.length === 0) {
+    container.innerHTML = '<span>○</span><strong>Смен пока нет</strong><p>Откройте график для планирования</p>';
+    return;
+  }
+
+  container.classList.remove('empty-state');
+  container.classList.add('upcoming-shifts');
+  container.innerHTML = days.map((day) => {
+    const date = parseLocalDate(day.date);
+    const names = [...day.masters, ...day.administrators].map((item) => item.name);
+    return `<div class="upcoming-shift"><time>${escapeHtml(new Intl.DateTimeFormat('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' }).format(date))}</time><strong>${escapeHtml(names.join(', ') || day.note)}</strong></div>`;
+  }).join('');
 }

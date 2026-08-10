@@ -5,7 +5,7 @@
 
 ## Windows-приложение
 
-Готовый установщик создаётся в `release/LoungeOS-Setup-0.4.0-x64.exe`:
+Готовый установщик создаётся в `release/LoungeOS-Setup-0.5.0-x64.exe`:
 
 ```powershell
 npm install
@@ -16,6 +16,14 @@ npm run desktop:build
 распакованной версии — `npm run desktop:pack`. Установленное приложение
 работает в собственном окне и открывает разделы через ссылки вида
 `loungeos://open/tasks`. Подробности — в `docs/desktop-app.md`.
+
+## График
+
+Установленное приложение читает общий локальный график из
+`C:\Users\User\Desktop\LoungeOS\schedule\app-schedule.json`. Этот файл
+создаётся сценарием `SyncGoogleSchedule.ps1` во внешнем рабочем каталоге и
+одновременно обновляет недельные CSV Rainmeter. Реальные имена и смены не
+включаются в публичный репозиторий или сборку GitHub Pages.
 
 ## Локальный запуск
 

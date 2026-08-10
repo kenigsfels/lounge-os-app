@@ -1,9 +1,9 @@
 import { renderHeader, initHeader } from './components/header.js';
 import { renderDock, initDock, dockItems } from './components/dock.js';
 import { renderToast, createToast } from './components/toast.js';
-import { renderDashboardScreen } from './screens/dashboard.js';
+import { renderDashboardScreen, initDashboardScreen } from './screens/dashboard.js';
 import { renderEmployeesScreen, initEmployeesScreen } from './screens/employees.js';
-import { renderScheduleScreen } from './screens/schedule.js';
+import { renderScheduleScreen, initScheduleScreen } from './screens/schedule.js';
 import { renderSalaryScreen } from './screens/salary.js';
 import { renderWarehouseScreen } from './screens/warehouse.js';
 import { renderKnowledgeScreen } from './screens/knowledge.js';
@@ -48,6 +48,14 @@ function startApp() {
 
     if (normalizedRoute === 'employees') {
       initEmployeesScreen(workspace, { showToast });
+    }
+
+    if (normalizedRoute === 'schedule') {
+      initScheduleScreen(workspace, { showToast });
+    }
+
+    if (normalizedRoute === 'dashboard') {
+      initDashboardScreen(workspace);
     }
 
     if (updateHistory) {

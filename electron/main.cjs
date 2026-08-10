@@ -1,9 +1,13 @@
-const { app, BrowserWindow, shell, session } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, session } = require('electron');
+const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const APP_ID = 'com.kenigsfels.loungeos';
 const PROTOCOL = 'loungeos';
 const DEV_SERVER_URL = process.env.LOUNGEOS_DEV_SERVER_URL;
+const DATA_ROOT = process.env.LOUNGEOS_DATA_ROOT
+  || path.join(process.env.USERPROFILE || '', 'Desktop', 'LoungeOS');
+const SCHEDULE_DATA_PATH = path.join(DATA_ROOT, 'schedule', 'app-schedule.json');
 const ALLOWED_ROUTES = new Set([
   'dashboard',
   'employees',
@@ -18,6 +22,17 @@ const ALLOWED_ROUTES = new Set([
 
 let mainWindow;
 let pendingRoute = getRouteFromArguments(process.argv);
+
+ipcMain.handle('schedule:load', async () => {
+  try {
+    const stats = await fs.stat(SCHEDULE_DATA_PATH);
+    if (stats.size > 2 * 1024 * 1024) throw new Error('Schedule file is too large');
+    const content = await fs.readFile(SCHEDULE_DATA_PATH, 'utf8');
+    return JSON.parse(content.replace(/^\uFEFF/, ''));
+  } catch {
+    return { version: 1, currentWeek: '', source: null, weeks: [] };
+  }
+});
 
 app.setAppUserModelId(APP_ID);
 app.enableSandbox();
@@ -129,6 +144,7 @@ function createWindow() {
     autoHideMenuBar: true,
     icon: path.join(__dirname, '..', 'build', 'icon.png'),
     webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
