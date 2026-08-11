@@ -1,7 +1,7 @@
 import { renderHeader, initHeader } from './components/header.js';
 import { renderDock, initDock, dockItems } from './components/dock.js';
 import { renderToast, createToast } from './components/toast.js';
-import { renderDashboardScreen, initDashboardScreen } from './screens/dashboard.js';
+import { renderSylonHomeScreen, initSylonHomeScreen } from './screens/home.js';
 import { renderEmployeesScreen, initEmployeesScreen } from './screens/employees.js';
 import { renderScheduleScreen, initScheduleScreen } from './screens/schedule.js';
 import { renderSalaryScreen } from './screens/salary.js';
@@ -13,7 +13,7 @@ import { renderSettingsScreen, initSettingsScreen } from './screens/settings.js'
 import { registerSylonServiceWorker } from './core/pwa.js';
 
 const screens = {
-  dashboard: renderDashboardScreen,
+  dashboard: renderSylonHomeScreen,
   employees: renderEmployeesScreen,
   schedule: renderScheduleScreen,
   salary: renderSalaryScreen,
@@ -39,27 +39,38 @@ function startApp() {
 
   const showToast = createToast(toastRoot.querySelector('.toast'));
   let setActiveDockItem = () => {};
+  let cleanupScreen = () => {};
 
   function navigate(route, { updateHistory = true } = {}) {
     const normalizedRoute = screens[route] ? route : 'dashboard';
-    workspace.innerHTML = screens[normalizedRoute]();
-    setActiveDockItem(normalizedRoute);
 
-    if (normalizedRoute === 'settings') {
-      initSettingsScreen(workspace, { showToast });
-    }
+    const renderRoute = () => {
+      cleanupScreen();
+      cleanupScreen = () => {};
+      document.body.classList.toggle('is-home-route', normalizedRoute === 'dashboard');
+      workspace.innerHTML = screens[normalizedRoute]();
+      setActiveDockItem(normalizedRoute);
 
-    if (normalizedRoute === 'employees') {
-      initEmployeesScreen(workspace, { showToast });
-    }
+      if (normalizedRoute === 'dashboard') {
+        cleanupScreen = initSylonHomeScreen(workspace, { navigate, showToast });
+      }
 
-    if (normalizedRoute === 'schedule') {
-      initScheduleScreen(workspace, { showToast });
-    }
+      if (normalizedRoute === 'settings') {
+        initSettingsScreen(workspace, { showToast });
+      }
 
-    if (normalizedRoute === 'dashboard') {
-      initDashboardScreen(workspace);
-    }
+      if (normalizedRoute === 'employees') {
+        initEmployeesScreen(workspace, { showToast });
+      }
+
+      if (normalizedRoute === 'schedule') {
+        initScheduleScreen(workspace, { showToast });
+      }
+    };
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (document.startViewTransition && !reducedMotion) document.startViewTransition(renderRoute);
+    else renderRoute();
 
     if (updateHistory) {
       window.history.replaceState(null, '', `#${normalizedRoute}`);

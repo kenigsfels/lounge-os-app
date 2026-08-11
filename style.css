@@ -3,4 +3,7 @@
 @import url('./styles/layout.css');
 @import url('./styles/components.css');
 @import url('./styles/screens.css');
+@import url('./styles/sylon-home.css');
+@import url('./styles/sylon-core.css');
+@import url('./styles/sylon-motion.css');
 @import url('./styles/responsive.css');

@@ -1,5 +1,5 @@
 export const dockItems = [
-  { route: 'dashboard', label: 'Dashboard', icon: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>' },
+  { route: 'dashboard', label: 'Главная', icon: '<path d="m4 11 8-7 8 7v9H5v-9Z"/><path d="M9 20v-6h6v6"/>' },
   { route: 'employees', label: 'Сотрудники', icon: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 2-6 6-6s6 2 6 6M16 5a3 3 0 0 1 0 6m1 3c2.7.3 4 2.3 4 5"/>' },
   { route: 'schedule', label: 'График смен', icon: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4m8-4v4M3 10h18"/>' },
   { route: 'salary', label: 'Зарплата', icon: '<path d="M3 7a3 3 0 0 1 3-3h13v16H6a3 3 0 0 1-3-3V7Zm0 1h16m-5 5h7v4h-7a2 2 0 0 1 0-4Z"/>' },

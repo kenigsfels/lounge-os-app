@@ -6,7 +6,7 @@ const LEGACY_APP_PREFIX = String.fromCharCode(108, 111, 117, 110, 103, 101, 95, 
 const SNAPSHOTS_KEY = 'sylon_local_snapshots';
 const SNAPSHOTS_STORAGE_NAME = 'local_snapshots';
 const APP_NAME = 'SYLON';
-const APP_VERSION = '0.8.0';
+const APP_VERSION = '0.9.0';
 const FORMAT_VERSION = 1;
 const MAX_LOCAL_SNAPSHOTS = 10;
 
