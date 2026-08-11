@@ -22,7 +22,7 @@ export function renderDashboardScreen() {
     <section class="view is-active" aria-labelledby="dashboardTitle">
       <div class="welcome-panel glass-panel">
         <div>
-          <p class="overline">Lounge OS · Dashboard</p>
+          <p class="overline">SYLON · Dashboard</p>
           <h1 id="dashboardTitle">Добро пожаловать</h1>
           <p>Всё необходимое для управления кальянной — в одном пространстве.</p>
         </div>

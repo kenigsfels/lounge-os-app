@@ -1,8 +1,8 @@
-# Windows-приложение LoungeOS
+# Windows-приложение SYLON
 
 ## Назначение
 
-Desktop-версия запускает production-сборку LoungeOS в собственном окне
+Desktop-версия запускает production-сборку SYLON в собственном окне
 Electron. Для обычной работы браузер и локальный Vite-сервер не требуются.
 Веб-версия на GitHub Pages остаётся доступной отдельно.
 
@@ -20,16 +20,16 @@ npm run desktop:build
 
 ## Системные ссылки
 
-При первом запуске приложение регистрирует протокол `loungeos`. Примеры:
+При первом запуске приложение регистрирует протокол `sylon`. Примеры:
 
 ```text
-loungeos://open/dashboard
-loungeos://open/schedule
-loungeos://open/tasks
+sylon://open/dashboard
+sylon://open/schedule
+sylon://open/tasks
 ```
 
 Если приложение уже открыто, ссылка переводит существующее окно в нужный
-раздел. Поддерживается только один основной экземпляр LoungeOS.
+раздел. Поддерживается только один основной экземпляр SYLON.
 
 ## Данные и безопасность
 
@@ -44,7 +44,8 @@ Renderer работает с `contextIsolation`, sandbox и без Node.js. Пр
 ## Локальный график
 
 Electron preload предоставляет интерфейсу только одну операцию чтения
-фиксированного файла `Desktop/LoungeOS/schedule/app-schedule.json`. Произвольный
+фиксированного файла `Desktop/SYLON/SYLON OS/data/schedule/app-schedule.json`.
+Произвольный
 доступ к файлам и Node.js в интерфейсе не включены. Благодаря этому Rainmeter и
 Windows-приложение используют один график, а персональные рабочие данные не
 попадают в публичную веб-сборку.

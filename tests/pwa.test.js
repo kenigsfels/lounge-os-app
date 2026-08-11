@@ -9,7 +9,7 @@ const manifest = JSON.parse(readFileSync(join(root, 'public', 'manifest.webmanif
 assert.equal(manifest.display, 'standalone');
 assert.equal(manifest.start_url, './#dashboard');
 assert.equal(manifest.scope, './');
-console.log('✓ PWA открывает LoungeOS как самостоятельное приложение');
+console.log('✓ PWA открывает SYLON как самостоятельное приложение');
 
 for (const size of ['192x192', '512x512']) {
   const icon = manifest.icons.find((item) => item.sizes === size);
@@ -25,4 +25,5 @@ const serviceWorker = readFileSync(join(root, 'public', 'service-worker.js'), 'u
 assert.match(serviceWorker, /request\.mode === 'navigate'/);
 assert.match(serviceWorker, /url\.origin !== self\.location\.origin/);
 assert.match(serviceWorker, /caches\.match\('\.\/index\.html'\)/);
+assert.match(serviceWorker, /LEGACY_CACHE_PREFIX/);
 console.log('✓ service worker сохраняет оболочку и не кэширует Supabase-запросы');

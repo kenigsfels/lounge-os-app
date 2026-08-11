@@ -1,4 +1,4 @@
-# Настройка Supabase для Lounge OS
+# Настройка Supabase для SYLON
 
 ## 1. Создание проекта
 
@@ -6,7 +6,7 @@
 добавьте URL опубликованного приложения в список разрешённых redirect URL:
 
 ```text
-https://kenigsfels.github.io/lounge-os-app/
+https://kenigsfels.github.io/sylon-os/
 ```
 
 Для локальной разработки также добавьте:

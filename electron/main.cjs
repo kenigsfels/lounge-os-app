@@ -2,11 +2,11 @@ const { app, BrowserWindow, ipcMain, shell, session } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
-const APP_ID = 'com.kenigsfels.loungeos';
-const PROTOCOL = 'loungeos';
-const DEV_SERVER_URL = process.env.LOUNGEOS_DEV_SERVER_URL;
-const DATA_ROOT = process.env.LOUNGEOS_DATA_ROOT
-  || path.join(process.env.USERPROFILE || '', 'Desktop', 'LoungeOS');
+const APP_ID = 'com.kenigsfels.sylon.os';
+const PROTOCOL = 'sylon';
+const DEV_SERVER_URL = process.env.SYLON_DEV_SERVER_URL;
+const DATA_ROOT = process.env.SYLON_DATA_ROOT
+  || path.join(process.env.USERPROFILE || '', 'Desktop', 'SYLON', 'SYLON OS', 'data');
 const SCHEDULE_DATA_PATH = path.join(DATA_ROOT, 'schedule', 'app-schedule.json');
 const ALLOWED_ROUTES = new Set([
   'dashboard',
@@ -134,7 +134,7 @@ function showMainWindow(route = null) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    title: 'LoungeOS',
+    title: 'SYLON OS',
     width: 1440,
     height: 900,
     minWidth: 1024,

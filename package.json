@@ -1,8 +1,8 @@
 {
-  "name": "lounge-os",
+  "name": "sylon-os",
   "private": true,
-  "version": "0.7.0",
-  "description": "LoungeOS — управление командой и операционной работой кальянной",
+  "version": "0.8.0",
+  "description": "SYLON — управление командой и операционной работой кальянной",
   "author": "kenigsfels",
   "main": "electron/main.cjs",
   "type": "module",

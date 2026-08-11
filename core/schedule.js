@@ -84,8 +84,8 @@ export function saveScheduleData(value) {
 
 export async function loadScheduleData() {
   try {
-    if (globalThis.loungeOS?.schedule?.load) {
-      const desktopSchedule = normalizeScheduleData(await globalThis.loungeOS.schedule.load());
+    if (globalThis.sylon?.schedule?.load) {
+      const desktopSchedule = normalizeScheduleData(await globalThis.sylon.schedule.load());
       if (hasScheduleData(desktopSchedule)) return saveScheduleData(desktopSchedule);
     }
   } catch {

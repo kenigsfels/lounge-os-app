@@ -164,7 +164,7 @@ export async function initScheduleScreen(root, { showToast }) {
   if (schedule.weeks.length === 0) {
     range.textContent = 'Нет импортированных недель';
     source.textContent = 'Google-таблица доступна в установленном приложении';
-    weekRoot.innerHTML = '<div class="schedule-loading"><strong>График пока не загружен</strong><p>Запустите синхронизацию на рабочем компьютере LoungeOS.</p></div>';
+    weekRoot.innerHTML = '<div class="schedule-loading"><strong>График пока не загружен</strong><p>Запустите синхронизацию на рабочем компьютере SYLON.</p></div>';
     return;
   }
 

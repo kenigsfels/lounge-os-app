@@ -11,7 +11,7 @@ function formatCurrentDate() {
 export function renderHeader() {
   return `
     <div class="menu-bar">
-      <a class="menu-bar__brand" href="#dashboard" data-home>Lounge <strong>OS</strong></a>
+      <a class="menu-bar__brand" href="#dashboard" data-home>SYLON <strong>OS</strong></a>
       <time class="menu-bar__date">${formatCurrentDate()}</time>
       <div class="menu-bar__system">
         <span class="system-status"><i></i><span>Система активна</span></span>

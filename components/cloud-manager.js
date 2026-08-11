@@ -69,7 +69,7 @@ export function initCloudManager(root, { showToast = () => {} } = {}) {
   manager.querySelector('[data-cloud-sync]').addEventListener('click', async () => {
     try {
       await synchronizeCloudData();
-      globalThis.dispatchEvent(new CustomEvent('lounge:cloud-synced'));
+      globalThis.dispatchEvent(new CustomEvent('sylon:cloud-synced'));
       showToast('Сотрудники и график синхронизированы');
     } catch (error) {
       showToast(error?.message || 'Ошибка синхронизации');

@@ -6,14 +6,14 @@ import {
 
 const CONTENT = {
   installed: {
-    title: 'LoungeOS установлен',
+    title: 'SYLON установлен',
     description: 'Приложение запускается с главного экрана телефона в отдельном окне.',
     action: ''
   },
   ready: {
     title: 'Готово к установке',
-    description: 'Добавьте LoungeOS на главный экран — вход через браузер после этого не понадобится.',
-    action: '<button class="primary-button" type="button" data-pwa-install>Установить LoungeOS</button>'
+    description: 'Добавьте SYLON на главный экран — вход через браузер после этого не понадобится.',
+    action: '<button class="primary-button" type="button" data-pwa-install>Установить SYLON</button>'
   },
   ios: {
     title: 'Добавьте на экран «Домой»',
@@ -59,14 +59,14 @@ export function initPwaManager(root, { showToast = () => {} } = {}) {
   const handleClick = async (event) => {
     if (!event.target.closest('[data-pwa-install]')) return;
     const result = await promptPwaInstall();
-    if (result.outcome === 'accepted') showToast('LoungeOS устанавливается');
+    if (result.outcome === 'accepted') showToast('SYLON устанавливается');
     if (result.outcome === 'dismissed') showToast('Установку можно повторить позже');
     refresh();
   };
 
   const handleInstalled = () => {
     refresh();
-    showToast('LoungeOS установлен на телефон');
+    showToast('SYLON установлен на телефон');
   };
 
   manager.addEventListener('click', handleClick);

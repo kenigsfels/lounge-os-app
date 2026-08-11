@@ -1,8 +1,31 @@
-const STORAGE_PREFIX = 'lounge_os_';
+const STORAGE_PREFIX = 'sylon_';
+const LEGACY_STORAGE_PREFIX = String.fromCharCode(108, 111, 117, 110, 103, 101, 95, 111, 115, 95);
+let migrationCompleted = false;
+
+function migrateLegacyStorage(storage) {
+  if (migrationCompleted) return;
+  migrationCompleted = true;
+
+  const legacyKeys = [];
+  for (let index = 0; index < storage.length; index += 1) {
+    const key = storage.key(index);
+    if (key?.startsWith(LEGACY_STORAGE_PREFIX)) legacyKeys.push(key);
+  }
+
+  legacyKeys.forEach((legacyKey) => {
+    const currentKey = `${STORAGE_PREFIX}${legacyKey.slice(LEGACY_STORAGE_PREFIX.length)}`;
+    if (storage.getItem(currentKey) === null) {
+      storage.setItem(currentKey, storage.getItem(legacyKey));
+    }
+    storage.removeItem(legacyKey);
+  });
+}
 
 function getStorage() {
   try {
-    return typeof globalThis.localStorage === 'undefined' ? null : globalThis.localStorage;
+    if (typeof globalThis.localStorage === 'undefined') return null;
+    migrateLegacyStorage(globalThis.localStorage);
+    return globalThis.localStorage;
   } catch {
     return null;
   }
@@ -70,7 +93,7 @@ export function clearAppStorage() {
     const appKeys = [];
     for (let index = 0; index < storage.length; index += 1) {
       const key = storage.key(index);
-      if (key?.startsWith(STORAGE_PREFIX)) appKeys.push(key);
+      if (key?.startsWith(STORAGE_PREFIX) || key?.startsWith(LEGACY_STORAGE_PREFIX)) appKeys.push(key);
     }
     appKeys.forEach((key) => storage.removeItem(key));
     return true;

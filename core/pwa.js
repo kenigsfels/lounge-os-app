@@ -1,5 +1,5 @@
-const INSTALLABLE_EVENT = 'loungeos:pwa-installable';
-const INSTALLED_EVENT = 'loungeos:pwa-installed';
+const INSTALLABLE_EVENT = 'sylon:pwa-installable';
+const INSTALLED_EVENT = 'sylon:pwa-installed';
 
 let deferredInstallPrompt = null;
 
@@ -43,7 +43,7 @@ export async function promptPwaInstall() {
   return { outcome: choice?.outcome || 'dismissed' };
 }
 
-export function registerLoungeOsServiceWorker() {
+export function registerSylonServiceWorker() {
   if (!isHttpContext() || !('serviceWorker' in globalThis.navigator)) return;
 
   globalThis.addEventListener('load', () => {
@@ -52,7 +52,7 @@ export function registerLoungeOsServiceWorker() {
       scope: './',
       updateViaCache: 'none'
     }).catch((error) => {
-      console.warn('LoungeOS service worker registration failed', error);
+      console.warn('SYLON service worker registration failed', error);
     });
   }, { once: true });
 }

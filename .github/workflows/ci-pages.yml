@@ -1,4 +1,4 @@
-name: Test and deploy Lounge OS
+name: Test and deploy SYLON
 
 on:
   push:

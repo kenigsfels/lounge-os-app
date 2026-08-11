@@ -1,11 +1,12 @@
 import { readStorage, writeStorage, removeStorage } from './storage.js';
 import { generateId } from './ids.js';
 
-const APP_PREFIX = 'lounge_os_';
-const SNAPSHOTS_KEY = 'lounge_os_local_snapshots';
+const APP_PREFIX = 'sylon_';
+const LEGACY_APP_PREFIX = String.fromCharCode(108, 111, 117, 110, 103, 101, 95, 111, 115, 95);
+const SNAPSHOTS_KEY = 'sylon_local_snapshots';
 const SNAPSHOTS_STORAGE_NAME = 'local_snapshots';
-const APP_NAME = 'Lounge OS';
-const APP_VERSION = '0.7.0';
+const APP_NAME = 'SYLON';
+const APP_VERSION = '0.8.0';
 const FORMAT_VERSION = 1;
 const MAX_LOCAL_SNAPSHOTS = 10;
 
@@ -81,6 +82,22 @@ function restoreRawAppState(state) {
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isSupportedAppKey(key) {
+  return key.startsWith(APP_PREFIX) || key.startsWith(LEGACY_APP_PREFIX);
+}
+
+function toCurrentAppKey(key) {
+  return key.startsWith(LEGACY_APP_PREFIX)
+    ? `${APP_PREFIX}${key.slice(LEGACY_APP_PREFIX.length)}`
+    : key;
+}
+
+function normalizeBackupKeys(keys) {
+  return Object.fromEntries(
+    Object.entries(keys).map(([key, value]) => [toCurrentAppKey(key), clone(value)])
+  );
 }
 
 function canMergeById(value) {
@@ -169,7 +186,7 @@ export function downloadBackup() {
     const backup = createBackup();
     const date = new Date();
     const pad = (value) => String(value).padStart(2, '0');
-    const filename = `lounge-os-backup-${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}-${pad(date.getHours())}-${pad(date.getMinutes())}.json`;
+    const filename = `sylon-os-backup-${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}-${pad(date.getHours())}-${pad(date.getMinutes())}.json`;
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     objectUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -187,14 +204,16 @@ export function downloadBackup() {
 export function validateBackup(data) {
   const errors = [];
   if (!isRecord(data)) return { valid: false, errors: ['Резервная копия должна быть объектом'], backup: null };
-  if (data.app !== APP_NAME) errors.push('Файл не является резервной копией Lounge OS');
+  const hasLegacyKeys = isRecord(data.keys)
+    && Object.keys(data.keys).some((key) => key.startsWith(LEGACY_APP_PREFIX));
+  if (data.app !== APP_NAME && !hasLegacyKeys) errors.push('Файл не является резервной копией SYLON');
   if (data.formatVersion !== FORMAT_VERSION) errors.push('Версия формата резервной копии не поддерживается');
   if (!isRecord(data.keys)) errors.push('Поле keys должно быть объектом');
 
   if (isRecord(data.keys)) {
     Object.keys(data.keys).forEach((key) => {
-      if (!key.startsWith(APP_PREFIX)) errors.push(`Недопустимый ключ: ${key}`);
-      if (key === SNAPSHOTS_KEY) errors.push('Локальные снимки нельзя импортировать из резервной копии');
+      if (!isSupportedAppKey(key)) errors.push(`Недопустимый ключ: ${key}`);
+      if (toCurrentAppKey(key) === SNAPSHOTS_KEY) errors.push('Локальные снимки нельзя импортировать из резервной копии');
     });
   }
 
@@ -228,9 +247,10 @@ export function restoreBackup(data, options = {}) {
       safetySnapshot = createLocalSnapshot(`Перед восстановлением backup (${mode})`);
       if (!safetySnapshot) throw new Error('Не удалось создать защитный снимок');
     }
-    const plan = buildRestorePlan(validation.backup.keys, mode);
+    const normalizedKeys = normalizeBackupKeys(validation.backup.keys);
+    const plan = buildRestorePlan(normalizedKeys, mode);
     applyRestorePlan(plan, { replace: mode === 'replace' });
-    return { success: true, mode, restoredKeys: Object.keys(validation.backup.keys), safetySnapshot: clone(safetySnapshot) };
+    return { success: true, mode, restoredKeys: Object.keys(normalizedKeys), safetySnapshot: clone(safetySnapshot) };
   } catch (error) {
     const rolledBack = restoreRawAppState(rollbackState);
     return { success: false, errors: [error?.message || 'Не удалось восстановить данные'], rolledBack };

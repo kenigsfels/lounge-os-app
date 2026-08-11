@@ -86,7 +86,7 @@ export function initBackupManager(root, { showToast = () => {} } = {}) {
       const result = restoreBackup(data, { mode, createSafetySnapshot: true });
       if (!result.success) throw new Error(result.errors.join('. '));
       refreshSnapshots();
-      globalThis.dispatchEvent(new CustomEvent('lounge:data-restored', { detail: { mode } }));
+      globalThis.dispatchEvent(new CustomEvent('sylon:data-restored', { detail: { mode } }));
       showToast('Данные успешно восстановлены');
     } catch (error) {
       showToast(error?.message || 'Не удалось прочитать резервную копию');
@@ -110,7 +110,7 @@ export function initBackupManager(root, { showToast = () => {} } = {}) {
       if (!globalThis.confirm('Восстановить этот снимок? Текущее состояние будет сохранено автоматически.')) return;
       const result = restoreLocalSnapshot(snapshotId);
       showToast(result.success ? 'Локальный снимок восстановлен' : result.errors.join('. '));
-      if (result.success) globalThis.dispatchEvent(new CustomEvent('lounge:data-restored'));
+      if (result.success) globalThis.dispatchEvent(new CustomEvent('sylon:data-restored'));
       refreshSnapshots();
     }
 

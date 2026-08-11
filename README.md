@@ -1,4 +1,4 @@
-# Lounge OS
+# SYLON
 
 Приложение для управления командой и операционной работой кальянной. Доступно
 как самостоятельное Windows-приложение, веб-версия и устанавливаемое
@@ -6,7 +6,7 @@
 
 ## Приложение для телефона
 
-Откройте `https://kenigsfels.github.io/lounge-os-app/` на телефоне и перейдите
+Откройте `https://kenigsfels.github.io/sylon-os/` на телефоне и перейдите
 в «Настройки» → «Мобильное приложение». На Android нажмите кнопку установки,
 а на iPhone используйте Safari → «Поделиться» → «На экран Домой».
 
@@ -15,7 +15,7 @@
 
 ## Windows-приложение
 
-Готовый установщик создаётся в `release/LoungeOS-Setup-0.6.0-x64.exe`:
+Готовый установщик создаётся в `release/SYLON-OS-Setup-0.8.0-x64.exe`:
 
 ```powershell
 npm install
@@ -25,12 +25,12 @@ npm run desktop:build
 Для разработки оболочки используйте `npm run desktop:dev`, а для проверки
 распакованной версии — `npm run desktop:pack`. Установленное приложение
 работает в собственном окне и открывает разделы через ссылки вида
-`loungeos://open/tasks`. Подробности — в `docs/desktop-app.md`.
+`sylon://open/tasks`. Подробности — в `docs/desktop-app.md`.
 
 ## График
 
 Установленное приложение читает общий локальный график из
-`C:\Users\User\Desktop\LoungeOS\schedule\app-schedule.json`. Этот файл
+`C:\Users\User\Desktop\SYLON\SYLON OS\data\schedule\app-schedule.json`. Этот файл
 создаётся сценарием `SyncGoogleSchedule.ps1` во внешнем рабочем каталоге и
 одновременно обновляет недельные CSV Rainmeter. Реальные имена и смены не
 включаются в публичный репозиторий или сборку GitHub Pages.

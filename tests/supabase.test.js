@@ -3,10 +3,10 @@ import { buildAuthRedirectUrl } from '../core/supabase.js';
 
 assert.equal(
   buildAuthRedirectUrl(
-    'https://kenigsfels.github.io/lounge-os-app/?deployment=31390655662#settings',
+    'https://kenigsfels.github.io/sylon-os/?deployment=31390655662#settings',
     './'
   ),
-  'https://kenigsfels.github.io/lounge-os-app/#settings'
+  'https://kenigsfels.github.io/sylon-os/#settings'
 );
 console.log('✓ callback GitHub Pages сохраняет каталог приложения');
 
@@ -17,7 +17,7 @@ assert.equal(
 console.log('✓ callback локальной разработки остаётся на Vite');
 
 assert.equal(
-  buildAuthRedirectUrl('https://example.test/current/page', '/lounge-os-app/'),
-  'https://example.test/lounge-os-app/#settings'
+  buildAuthRedirectUrl('https://example.test/current/page', '/sylon-os/'),
+  'https://example.test/sylon-os/#settings'
 );
 console.log('✓ абсолютный base Vite поддерживается');

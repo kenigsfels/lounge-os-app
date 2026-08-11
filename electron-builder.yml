@@ -1,5 +1,5 @@
-appId: com.kenigsfels.loungeos
-productName: LoungeOS
+appId: com.kenigsfels.sylon.os
+productName: SYLON OS
 copyright: Copyright (c) 2026 kenigsfels
 asar: true
 npmRebuild: false
@@ -21,13 +21,13 @@ win:
     - target: nsis
       arch:
         - x64
-  artifactName: LoungeOS-Setup-${version}-${arch}.${ext}
+  artifactName: SYLON-OS-Setup-${version}-${arch}.${ext}
 
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: LoungeOS
+  shortcutName: SYLON OS
   runAfterFinish: true
   deleteAppDataOnUninstall: false

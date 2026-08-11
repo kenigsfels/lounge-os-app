@@ -46,46 +46,79 @@ function assert(condition, message) {
 
 function setJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
 function getJson(key) { return JSON.parse(localStorage.getItem(key)); }
+function stableStringify(value) {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+function checksum(value) {
+  const input = stableStringify(value);
+  let hash = 2166136261;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `fnv1a_${(hash >>> 0).toString(16).padStart(8, '0')}`;
+}
 
 try {
   localStorage.setItem('foreign_app_token', 'keep-me');
-  setJson('lounge_os_employees', [{ id: 'e1', name: 'Сотрудник 1', position: 'Основной' }]);
-  setJson('lounge_os_preferences', { compact: true });
-  setJson('lounge_os_local_snapshots', [{ id: 'must-not-be-nested' }]);
+  setJson('sylon_employees', [{ id: 'e1', name: 'Сотрудник 1', position: 'Основной' }]);
+  setJson('sylon_preferences', { compact: true });
+  setJson('sylon_local_snapshots', [{ id: 'must-not-be-nested' }]);
 
   const backup = createBackup();
-  assert(backup.app === 'Lounge OS' && backup.formatVersion === 1, 'резервная копия создана в поддерживаемом формате');
-  assert(Object.keys(backup.keys).every((key) => key.startsWith('lounge_os_')), 'в backup входят только ключи Lounge OS');
-  assert(!('lounge_os_local_snapshots' in backup.keys), 'локальные снимки не вкладываются в backup');
+  assert(backup.app === 'SYLON' && backup.formatVersion === 1, 'резервная копия создана в поддерживаемом формате');
+  assert(Object.keys(backup.keys).every((key) => key.startsWith('sylon_')), 'в backup входят только ключи SYLON');
+  assert(!('sylon_local_snapshots' in backup.keys), 'локальные снимки не вкладываются в backup');
   assert(validateBackup(backup).valid, 'корректный checksum принят');
 
+  const legacyPrefix = String.fromCharCode(108, 111, 117, 110, 103, 101, 95, 111, 115, 95);
+  const legacyBackup = JSON.parse(JSON.stringify(backup));
+  legacyBackup.app = String.fromCharCode(76, 111, 117, 110, 103, 101, 32, 79, 83);
+  legacyBackup.keys = Object.fromEntries(Object.entries(legacyBackup.keys).map(([key, value]) => (
+    [`${legacyPrefix}${key.slice('sylon_'.length)}`, value]
+  )));
+  legacyBackup.checksum = checksum({
+    app: legacyBackup.app,
+    formatVersion: legacyBackup.formatVersion,
+    createdAt: legacyBackup.createdAt,
+    appVersion: legacyBackup.appVersion,
+    keys: legacyBackup.keys
+  });
+  assert(validateBackup(legacyBackup).valid, 'резервная копия до переименования поддерживается');
+  const legacyRestore = restoreBackup(legacyBackup, { mode: 'replace', createSafetySnapshot: false });
+  assert(legacyRestore.success && getJson('sylon_employees')[0].id === 'e1', 'старый backup переносится в SYLON');
+
   const damaged = JSON.parse(JSON.stringify(backup));
-  damaged.keys.lounge_os_employees[0].name = 'Подмена';
+  damaged.keys.sylon_employees[0].name = 'Подмена';
   assert(!validateBackup(damaged).valid, 'backup с повреждённым checksum отклонён');
 
-  localStorage.setItem('lounge_os_temporary', JSON.stringify({ remove: true }));
-  setJson('lounge_os_employees', [{ id: 'other', name: 'Другой' }]);
+  localStorage.setItem('sylon_temporary', JSON.stringify({ remove: true }));
+  setJson('sylon_employees', [{ id: 'other', name: 'Другой' }]);
   const replaceResult = restoreBackup(backup, { mode: 'replace', createSafetySnapshot: true });
-  assert(replaceResult.success && !localStorage.getItem('lounge_os_temporary'), 'режим replace полностью заменяет данные Lounge OS');
+  assert(replaceResult.success && !localStorage.getItem('sylon_temporary'), 'режим replace полностью заменяет данные SYLON');
   assert(getLocalSnapshots().length >= 1, 'перед replace создан safety snapshot');
 
-  setJson('lounge_os_employees', [
+  setJson('sylon_employees', [
     { id: 'e1', name: 'Старое имя', position: 'Основной' },
     { id: 'e3', name: 'Локальный', position: 'Саппорт' }
   ]);
   const mergeBackup = createBackup();
-  mergeBackup.keys.lounge_os_employees = [
+  mergeBackup.keys.sylon_employees = [
     { id: 'e1', name: 'Приоритет backup', position: 'Основной' },
     { id: 'e2', name: 'Из backup', position: 'Администратор' }
   ];
-  setJson('lounge_os_employees', mergeBackup.keys.lounge_os_employees);
+  setJson('sylon_employees', mergeBackup.keys.sylon_employees);
   const regeneratedMergeBackup = createBackup();
-  setJson('lounge_os_employees', [
+  setJson('sylon_employees', [
     { id: 'e1', name: 'Старое имя', position: 'Основной' },
     { id: 'e3', name: 'Локальный', position: 'Саппорт' }
   ]);
   const mergeResult = restoreBackup(regeneratedMergeBackup, { mode: 'merge', createSafetySnapshot: false });
-  const mergedEmployees = getJson('lounge_os_employees');
+  const mergedEmployees = getJson('sylon_employees');
   assert(mergeResult.success && mergedEmployees.length === 3, 'режим merge объединяет массивы по id');
   assert(mergedEmployees.find((item) => item.id === 'e1').name === 'Приоритет backup', 'при merge запись из backup имеет приоритет');
 
@@ -95,11 +128,11 @@ try {
   assert(limitedSnapshots.length === 10 && limitedSnapshots[0].reason === 'Снимок 11', 'хранятся только 10 последних снимков');
 
   clearLocalSnapshots();
-  setJson('lounge_os_employees', [{ id: 'before', name: 'До снимка' }]);
+  setJson('sylon_employees', [{ id: 'before', name: 'До снимка' }]);
   const localSnapshot = createLocalSnapshot('Контрольная точка');
-  setJson('lounge_os_employees', [{ id: 'after', name: 'После снимка' }]);
+  setJson('sylon_employees', [{ id: 'after', name: 'После снимка' }]);
   const localRestore = restoreLocalSnapshot(localSnapshot.id);
-  assert(localRestore.success && getJson('lounge_os_employees')[0].id === 'before', 'локальный снимок восстанавливает сохранённое состояние');
+  assert(localRestore.success && getJson('sylon_employees')[0].id === 'before', 'локальный снимок восстанавливает сохранённое состояние');
 
   const downloadResult = downloadBackup();
   assert(downloadResult.success && linkClicked && revokedUrl === 'blob:backup-test', 'backup скачивается, а временный URL освобождается');

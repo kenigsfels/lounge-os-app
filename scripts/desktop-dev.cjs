@@ -17,7 +17,7 @@ async function main() {
     cwd: process.cwd(),
     env: {
       ...process.env,
-      LOUNGEOS_DEV_SERVER_URL: 'http://127.0.0.1:8765'
+      SYLON_DEV_SERVER_URL: 'http://127.0.0.1:8765'
     },
     stdio: 'inherit'
   });

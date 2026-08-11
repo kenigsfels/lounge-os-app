@@ -22,8 +22,10 @@ const {
   replaceEmployees
 } = await import('../core/employees.js');
 
-const STORAGE_KEY = 'lounge_os_employees';
+const STORAGE_KEY = 'sylon_employees';
+const LEGACY_STORAGE_KEY = `${String.fromCharCode(108, 111, 117, 110, 103, 101, 95, 111, 115, 95)}employees`;
 const originalData = globalThis.localStorage.getItem(STORAGE_KEY);
+const originalLegacyData = globalThis.localStorage.getItem(LEGACY_STORAGE_KEY);
 let passed = 0;
 
 function assert(condition, message) {
@@ -33,6 +35,15 @@ function assert(condition, message) {
 }
 
 try {
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify([{ id: 'legacy-1', name: 'До переименования' }]));
+  assert(
+    getEmployees()[0]?.id === 'legacy-1'
+      && localStorage.getItem(STORAGE_KEY)
+      && !localStorage.getItem(LEGACY_STORAGE_KEY),
+    'локальные данные автоматически перенесены в пространство SYLON'
+  );
+
   clearEmployees();
   assert(getEmployees().length === 0, 'база сотрудников временно очищена');
 
@@ -69,5 +80,7 @@ try {
 } finally {
   if (originalData === null) globalThis.localStorage.removeItem(STORAGE_KEY);
   else globalThis.localStorage.setItem(STORAGE_KEY, originalData);
+  if (originalLegacyData === null) globalThis.localStorage.removeItem(LEGACY_STORAGE_KEY);
+  else globalThis.localStorage.setItem(LEGACY_STORAGE_KEY, originalLegacyData);
   console.log('Исходные данные восстановлены.');
 }

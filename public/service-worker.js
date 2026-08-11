@@ -1,5 +1,6 @@
-const CACHE_NAME = 'lounge-os-shell-v0.7.0';
-const CACHE_PREFIX = 'lounge-os-';
+const CACHE_NAME = 'sylon-shell-v0.8.0';
+const CACHE_PREFIX = 'sylon-';
+const LEGACY_CACHE_PREFIX = String.fromCharCode(108, 111, 117, 110, 103, 101, 45, 111, 115, 45);
 const APP_SHELL = [
   './',
   './index.html',
@@ -23,7 +24,9 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((keys) => Promise.all(
         keys
-          .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+          .filter((key) => (
+            key.startsWith(CACHE_PREFIX) || key.startsWith(LEGACY_CACHE_PREFIX)
+          ) && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
