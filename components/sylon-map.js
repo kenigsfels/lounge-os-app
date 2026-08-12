@@ -72,24 +72,48 @@ export async function initSylonMap(container, map = SYLON_MAP) {
   ]));
   const nodeMeshes = new Map();
   const edgeLines = new Map();
+  const hubRings = new THREE.Group();
+  graph.add(hubRings);
 
   visibleNodes.forEach((node, index) => {
     const isRoot = node.id === map.rootId;
-    const geometry = new THREE.OctahedronGeometry(isRoot ? 0.16 : 0.075, 1);
-    const material = new THREE.MeshStandardMaterial({
+    const geometry = isRoot
+      ? new THREE.DodecahedronGeometry(0.22, 1)
+      : new THREE.OctahedronGeometry(0.075, 1);
+    const materialOptions = {
       color: isRoot ? 0xd5c08e : node.tone === 'amber' ? 0xa88d5a : 0x789283,
       emissive: isRoot ? 0x6d5530 : 0x284638,
       emissiveIntensity: isRoot ? 1.25 : 0.72,
-      roughness: 0.34,
+      roughness: isRoot ? 0.18 : 0.34,
+      metalness: 0.02,
       transparent: true,
       opacity: isRoot ? 0.96 : 0.82
-    });
+    };
+    const material = isRoot
+      ? new THREE.MeshPhysicalMaterial({ ...materialOptions, transmission: 0.22, thickness: 0.45, clearcoat: 0.65, clearcoatRoughness: 0.2 })
+      : new THREE.MeshStandardMaterial(materialOptions);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.copy(pointById.get(node.id));
     mesh.userData = { id: node.id, phase: index * 1.37, baseScale: isRoot ? 1.35 : 1 };
     mesh.scale.setScalar(mesh.userData.baseScale);
     graph.add(mesh);
     nodeMeshes.set(node.id, mesh);
+  });
+
+  [0.34, 0.48, 0.64].forEach((radius, index) => {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(radius, index === 0 ? 0.006 : 0.004, 6, 72),
+      new THREE.MeshBasicMaterial({
+        color: index === 1 ? 0xb99a5f : 0x718e7a,
+        transparent: true,
+        opacity: 0.13 - index * 0.025,
+        depthWrite: false
+      })
+    );
+    ring.rotation.x = index * 0.62;
+    ring.rotation.y = index * 0.48;
+    ring.userData.speed = index % 2 === 0 ? 0.055 + index * 0.012 : -0.042;
+    hubRings.add(ring);
   });
 
   map.edges.forEach((edge) => {
@@ -100,7 +124,7 @@ export async function initSylonMap(container, map = SYLON_MAP) {
     const material = new THREE.LineBasicMaterial({
       color: edge.source === map.rootId ? 0x8aa193 : 0x8f815f,
       transparent: true,
-      opacity: edge.source === map.rootId ? 0.18 : 0.055,
+      opacity: edge.source === map.rootId ? 0.035 : 0.01,
       depthWrite: false
     });
     const line = new THREE.Line(geometry, material);
@@ -165,6 +189,10 @@ export async function initSylonMap(container, map = SYLON_MAP) {
       graph.rotation.y += (pointerX * 0.045 - graph.rotation.y) * Math.min(1, delta * 2.2);
       graph.rotation.x += (-0.025 + pointerY * 0.025 - graph.rotation.x) * Math.min(1, delta * 2.2);
       dust.rotation.z = elapsed * 0.006;
+      hubRings.children.forEach((ring, index) => {
+        ring.rotation.z += delta * ring.userData.speed;
+        ring.rotation.x += Math.sin(elapsed * 0.18 + index) * delta * 0.006;
+      });
       camera.position.z += (targetDepth - camera.position.z) * Math.min(1, delta * 4.6);
     } else {
       camera.position.z = targetDepth;
@@ -175,6 +203,10 @@ export async function initSylonMap(container, map = SYLON_MAP) {
       const active = id === hoveredId || id === focusedId || node?.route === modeRoute;
       const drift = profile.reducedMotion ? 0 : Math.sin(elapsed * 0.32 + mesh.userData.phase) * 0.018;
       mesh.position.z = (node?.spatial?.z || 0) + drift;
+      if (!profile.reducedMotion) {
+        mesh.rotation.x = elapsed * 0.08 + mesh.userData.phase;
+        mesh.rotation.y = elapsed * 0.11 + mesh.userData.phase * 0.7;
+      }
       const pulse = profile.reducedMotion ? 0 : Math.max(0, Math.sin(elapsed * 1.1 + mesh.userData.phase)) * 0.035;
       mesh.scale.setScalar(mesh.userData.baseScale * (1 + pulse + (active ? 0.16 : 0)));
       mesh.material.emissiveIntensity = (id === map.rootId ? 1.25 : 0.65) + (active ? 0.8 : 0);
@@ -183,8 +215,10 @@ export async function initSylonMap(container, map = SYLON_MAP) {
     edgeLines.forEach((line) => {
       const connected = [line.userData.source, line.userData.target].includes(hoveredId)
         || [line.userData.source, line.userData.target].includes(focusedId);
-      line.material.opacity = line.userData.baseOpacity + (connected ? 0.34 : 0);
+      line.material.opacity = line.userData.baseOpacity + (connected ? 0.12 : 0);
     });
+    warmLight.position.x = 1.7 + Math.sin(elapsed * 0.21) * 0.28;
+    warmLight.position.y = 1.5 + Math.cos(elapsed * 0.17) * 0.22;
     renderer.render(scene, camera);
   };
 

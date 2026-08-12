@@ -7,17 +7,36 @@ import { initAssistantInput, renderAssistantInput } from '../components/assistan
 import { initContextualCard, renderContextualCard } from '../components/contextual-card.js';
 import { initFallbackNavigation, renderFallbackNavigation } from '../components/fallback-navigation.js';
 
-function renderMapEdge(edge) {
+function buildMapEdgePath(edge, index) {
   const source = getMapNode(edge.source);
   const target = getMapNode(edge.target);
-  if (!source?.position || !target?.position) return '';
+  if (!source?.position || !target?.position) return null;
+  const { x: x1, y: y1 } = source.position;
+  const { x: x2, y: y2 } = target.position;
+  const centerX = (x1 + x2) / 2;
+  const centerY = (y1 + y2) / 2;
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const length = Math.max(1, Math.hypot(dx, dy));
+  const direction = index % 2 === 0 ? 1 : -1;
+  const bend = edge.source === SYLON_MAP.rootId ? 2.8 : 5.5;
+  const controlX = centerX - (dy / length) * bend * direction;
+  const controlY = centerY + (dx / length) * bend * direction;
+  return `M ${x1} ${y1} Q ${controlX.toFixed(2)} ${controlY.toFixed(2)} ${x2} ${y2}`;
+}
+
+function renderMapEdge(edge, index) {
+  const source = getMapNode(edge.source);
+  const target = getMapNode(edge.target);
+  const path = buildMapEdgePath(edge, index);
+  if (!path) return '';
   return `
-    <line class="sylon-map-edge" data-map-edge="${edge.id}"
-      data-source="${edge.source}" data-target="${edge.target}"
-      x1="${source.position.x}" y1="${source.position.y}"
-      x2="${target.position.x}" y2="${target.position.y}">
+    <g class="sylon-map-edge-group" data-map-edge="${edge.id}"
+      data-source="${edge.source}" data-target="${edge.target}">
       <title>${source.label} — ${edge.relation} — ${target.label}</title>
-    </line>`;
+      <path class="sylon-map-edge sylon-map-edge--base" d="${path}" pathLength="1"></path>
+      <path class="sylon-map-edge sylon-map-edge--signal" d="${path}" pathLength="1"></path>
+    </g>`;
 }
 
 function renderMapNode(node, index) {
@@ -62,6 +81,7 @@ export function renderSylonHomeScreen() {
         <span>SYLON</span><i aria-hidden="true">/</i><strong data-map-path-current>Главная карта</strong>
       </nav>
       <div class="sylon-map-stage" data-map-stage>
+        <div class="sylon-map-depth" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="sylon-map-layer" data-sylon-map aria-hidden="true"></div>
         <svg class="sylon-map-edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Связи между разделами">
           ${visibleEdges.map(renderMapEdge).join('')}

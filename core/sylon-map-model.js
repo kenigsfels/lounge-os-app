@@ -4,6 +4,7 @@ const nodes = [
     kind: 'system',
     label: 'SYLON',
     eyebrow: 'Центр карты',
+    detail: 'Система связей активна',
     position: { x: 50, y: 50, z: 0 },
     spatial: { x: 0, y: 0, z: 0 }
   },
@@ -14,7 +15,7 @@ const nodes = [
     detail: 'Люди и роли',
     route: 'employees',
     tone: 'moss',
-    position: { x: 24, y: 29, z: 0.18 },
+    position: { x: 22, y: 27, z: 0.18 },
     spatial: { x: -2.45, y: 1.55, z: 0.2 }
   },
   {
@@ -24,7 +25,7 @@ const nodes = [
     detail: 'Сегодня и дальше',
     route: 'schedule',
     tone: 'amber',
-    position: { x: 75, y: 27, z: 0.1 },
+    position: { x: 77, y: 25, z: 0.1 },
     spatial: { x: 2.35, y: 1.7, z: 0.08 }
   },
   {
@@ -34,7 +35,7 @@ const nodes = [
     detail: 'Фокус и действия',
     route: 'tasks',
     tone: 'stone',
-    position: { x: 23, y: 72, z: 0.28 },
+    position: { x: 23, y: 74, z: 0.28 },
     spatial: { x: -2.55, y: -1.7, z: 0.28 }
   },
   {
@@ -44,7 +45,7 @@ const nodes = [
     detail: 'Остатки и движение',
     route: 'warehouse',
     tone: 'moss',
-    position: { x: 77, y: 70, z: 0.2 },
+    position: { x: 79, y: 70, z: 0.2 },
     spatial: { x: 2.55, y: -1.55, z: 0.2 }
   },
   { id: 'training', kind: 'workspace', label: 'Обучение', route: 'training', enabled: false },
