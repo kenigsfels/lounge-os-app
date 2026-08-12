@@ -4,12 +4,14 @@
       <stop offset="0" stop-color="#10261f"/>
       <stop offset="1" stop-color="#050b09"/>
     </linearGradient>
-    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#5ae1a5"/>
-      <stop offset="1" stop-color="#dcb96c"/>
-    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#75c299"/><stop offset="1" stop-color="#315e49"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e1c584"/><stop offset="1" stop-color="#876c37"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
   <rect x="20" y="20" width="472" height="472" rx="112" fill="url(#background)" stroke="#b99646" stroke-width="12"/>
-  <path d="M154 130v252h210v-48H210V130z" fill="url(#mark)"/>
-  <circle cx="356" cy="152" r="28" fill="#5ae1a5" opacity=".9"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#5d8b70" stroke-width="5" opacity=".3"/>
+  <path d="M166 137C338 164 357 302 185 376" fill="none" stroke="url(#green)" stroke-width="38" stroke-linecap="round"/>
+  <path d="M341 136C171 175 157 301 328 378" fill="none" stroke="url(#gold)" stroke-width="35" stroke-linecap="round"/>
+  <circle cx="256" cy="257" r="28" fill="#d4c08c" filter="url(#glow)"/>
+  <circle cx="171" cy="139" r="10" fill="#8ed0aa"/><circle cx="341" cy="136" r="10" fill="#e3c77f"/>
 </svg>

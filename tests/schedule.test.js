@@ -5,6 +5,11 @@ import {
   getUpcomingDays,
   normalizeScheduleData
 } from '../core/schedule.js';
+import {
+  buildScheduleTimeline,
+  getScheduleDayState,
+  getTodayScheduleDay
+} from '../screens/schedule.js';
 
 const schedule = normalizeScheduleData({
   version: 1,
@@ -32,6 +37,23 @@ assert.equal(getUpcomingDays(schedule, new Date('2026-08-10T12:00:00')).length, 
 console.log('✓ ближайшие смены найдены');
 assert.equal(schedule.weeks[0].days[0].masters[0].name, 'Сотрудник');
 console.log('✓ назначения сотрудников сохранены');
+
+const todayDay = getTodayScheduleDay(schedule, new Date('2026-08-10T12:00:00'));
+assert.equal(todayDay.date, '2026-08-10');
+assert.equal(buildScheduleTimeline(todayDay)[0].role, 'Мастер');
+assert.equal(getScheduleDayState(todayDay).id, 'partial');
+console.log('✓ новое представление «Сегодня» читает существующую модель графика');
+
+assert.equal(getScheduleDayState({ masters: [], administrators: [], note: '' }).id, 'empty');
+assert.equal(getScheduleDayState({
+  masters: [{ name: 'Мастер', shift: '12-01' }],
+  administrators: [{ name: 'Администратор', shift: '10-01' }]
+}).id, 'ready');
+assert.equal(buildScheduleTimeline({
+  masters: [{ name: 'Позже', shift: '18-01' }],
+  administrators: [{ name: 'Раньше', shift: '10-01' }]
+})[0].name, 'Раньше');
+console.log('✓ состояние смены и временная линия определяются без записи данных');
 
 const newerSchedule = normalizeScheduleData({
   ...schedule,

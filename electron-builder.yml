@@ -1,5 +1,5 @@
 appId: com.kenigsfels.sylon.os
-productName: SYLON OS
+productName: SYLON Desktop Preview
 copyright: Copyright (c) 2026 kenigsfels
 asar: true
 npmRebuild: false
@@ -21,7 +21,13 @@ win:
     - target: nsis
       arch:
         - x64
+    - target: portable
+      arch:
+        - x64
   artifactName: SYLON-OS-Setup-${version}-${arch}.${ext}
+
+portable:
+  artifactName: SYLON-Desktop-Preview-${version}-${arch}.${ext}
 
 nsis:
   oneClick: false

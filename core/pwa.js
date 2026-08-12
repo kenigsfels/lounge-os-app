@@ -46,6 +46,13 @@ export async function promptPwaInstall() {
 export function registerSylonServiceWorker() {
   if (!isHttpContext() || !('serviceWorker' in globalThis.navigator)) return;
 
+  if (import.meta.env?.DEV) {
+    globalThis.navigator.serviceWorker.getRegistrations?.()
+      .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+      .catch(() => {});
+    return;
+  }
+
   globalThis.addEventListener('load', () => {
     const workerUrl = new URL('service-worker.js', document.baseURI);
     globalThis.navigator.serviceWorker.register(workerUrl, {

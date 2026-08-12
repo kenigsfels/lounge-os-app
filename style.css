@@ -4,6 +4,15 @@
 @import url('./styles/components.css');
 @import url('./styles/screens.css');
 @import url('./styles/sylon-home.css');
-@import url('./styles/sylon-core.css');
+@import url('./styles/sylon-assistant.css');
+@import url('./styles/sylon-map.css');
 @import url('./styles/sylon-motion.css');
+@import url('./styles/workspace-shell.css');
+@import url('./styles/tasks.css');
+@import url('./styles/schedule-space.css');
+@import url('./styles/team-space.css');
+@import url('./styles/warehouse-space.css');
+@import url('./styles/analytics-space.css');
+@import url('./styles/knowledge-space.css');
+@import url('./styles/desktop-preview.css');
 @import url('./styles/responsive.css');

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sylon-shell-v0.9.0';
+const CACHE_NAME = 'sylon-shell-v0.10.0-sylon-map';
 const CACHE_PREFIX = 'sylon-';
 const LEGACY_CACHE_PREFIX = String.fromCharCode(108, 111, 117, 110, 103, 101, 45, 111, 115, 45);
 const APP_SHELL = [

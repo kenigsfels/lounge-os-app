@@ -1,8 +1,17 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { executeSylonCommand, resolveSylonCommand } from '../core/command-router.js';
-import { createSylonInteractionState, getSylonQualityProfile, SYLON_MODULES } from '../core/sylon-state.js';
-import { supportsWebGL } from '../components/sylon-core.js';
+import {
+  cycleSylonMode,
+  getSylonQualityProfile,
+  getSylonMode,
+  setSylonMode,
+  subscribeSylonMode,
+  SYLON_MODES,
+  SYLON_MODULES
+} from '../core/sylon-state.js';
+import { getMapNeighbors, getVisibleMapNodes, SYLON_MAP } from '../core/sylon-map-model.js';
+import { supportsMapWebGL } from '../components/sylon-map.js';
 
 let passed = 0;
 function test(name, callback) {
@@ -16,6 +25,7 @@ test('команды на русском открывают существующ
   assert.equal(resolveSylonCommand('Кто сегодня работает?').route, 'schedule');
   assert.equal(resolveSylonCommand('Открой склад').route, 'warehouse');
   assert.equal(resolveSylonCommand('Покажи команду').route, 'employees');
+  assert.equal(resolveSylonCommand('Открой пульс заведения').route, 'analytics');
 });
 
 test('неизвестная команда безопасно остаётся в интерфейсе', () => {
@@ -45,34 +55,42 @@ test('профиль качества уважает reduced motion и слаб�
   assert.ok(profile.particles < 100);
 });
 
-test('начальное состояние Core ограничивает глубину и движение', () => {
-  const state = createSylonInteractionState();
-  assert.equal(state.depth, 4.25);
-  assert.equal(state.dragging, false);
-  assert.equal(state.velocity, 0);
+test('карта содержит центральный узел и четыре рабочих пространства', () => {
+  assert.equal(SYLON_MAP.rootId, 'sylon');
+  assert.deepEqual(
+    getVisibleMapNodes().filter((node) => node.route).map((node) => node.route),
+    ['employees', 'schedule', 'tasks', 'warehouse']
+  );
+  assert.equal(getMapNeighbors('sylon').filter((node) => node.enabled !== false).length, 4);
+  assert.ok(SYLON_MAP.edges.every((edge) => edge.relation));
 });
 
 test('проверка WebGL безопасно включает CSS fallback', () => {
-  assert.equal(supportsWebGL({ createElement: () => ({ getContext: () => null }) }), false);
-  assert.equal(supportsWebGL({ createElement: () => ({ getContext: (name) => name === 'webgl' ? {} : null }) }), true);
-  assert.equal(supportsWebGL(null), false);
+  assert.equal(supportsMapWebGL({ createElement: () => ({ getContext: () => null }) }), false);
+  assert.equal(supportsMapWebGL({ createElement: () => ({ getContext: (name) => name === 'webgl' ? {} : null }) }), true);
+  assert.equal(supportsMapWebGL(null), false);
 });
 
-const coreSource = await readFile(new URL('../components/sylon-core.js', import.meta.url), 'utf8');
+const mapSource = await readFile(new URL('../components/sylon-map.js', import.meta.url), 'utf8');
+const mapModelSource = await readFile(new URL('../core/sylon-map-model.js', import.meta.url), 'utf8');
 const appSource = await readFile(new URL('../script.js', import.meta.url), 'utf8');
 const homeStyles = await readFile(new URL('../styles/sylon-home.css', import.meta.url), 'utf8');
+const homeSource = await readFile(new URL('../screens/home.js', import.meta.url), 'utf8');
+const workspaceStyles = await readFile(new URL('../styles/workspace-shell.css', import.meta.url), 'utf8');
+const desktopMainSource = await readFile(new URL('../electron/main.cjs', import.meta.url), 'utf8');
+const desktopSplashSource = await readFile(new URL('../electron/splash.html', import.meta.url), 'utf8');
 
-test('Core приостанавливается со вкладкой и освобождает WebGL', () => {
-  assert.match(coreSource, /visibilitychange/);
-  assert.match(coreSource, /cancelAnimationFrame/);
-  assert.match(coreSource, /renderer\.dispose\(\)/);
-  assert.match(coreSource, /forceContextLoss/);
+test('пространственный слой Map приостанавливается со вкладкой и освобождает WebGL', () => {
+  assert.match(mapSource, /visibilitychange/);
+  assert.match(mapSource, /cancelAnimationFrame/);
+  assert.match(mapSource, /renderer\.dispose\(\)/);
+  assert.match(mapSource, /forceContextLoss/);
 });
 
-test('Core содержит WebGL fallback и адаптивное качество', () => {
-  assert.match(coreSource, /supportsWebGL/);
-  assert.match(coreSource, /renderFallback/);
-  assert.match(coreSource, /dataset\.quality = 'adaptive'/);
+test('Map содержит независимый от WebGL fallback и адаптивный профиль качества', () => {
+  assert.match(mapSource, /supportsMapWebGL/);
+  assert.match(mapSource, /renderFallback/);
+  assert.match(mapSource, /getSylonQualityProfile/);
 });
 
 test('SPA вызывает очистку экрана при навигации', () => {
@@ -83,6 +101,61 @@ test('SPA вызывает очистку экрана при навигации
 test('Home имеет доступную клавиатурную fallback-навигацию', () => {
   assert.match(homeStyles, /focus-within/);
   assert.match(homeStyles, /focus-visible/);
+});
+
+test('пространственная сцена показывает четыре ближайших рабочих узла и смысловые связи', () => {
+  assert.match(homeSource, /data-map-node/);
+  assert.match(homeSource, /data-map-edge/);
+  assert.match(homeSource, /ArrowLeft/);
+  assert.match(homeSource, /sylon:map-focus/);
+  assert.match(mapModelSource, /relation:/);
+});
+
+test('сцена держит навигационный путь в DOM и не записывает его в LocalStorage', () => {
+  assert.match(homeSource, /data-map-path/);
+  assert.match(homeSource, /setMapFocus/);
+  assert.doesNotMatch(homeSource, /localStorage/);
+});
+
+test('узел раскрывается в рабочую оболочку, а Dock остаётся резервной навигацией', () => {
+  assert.match(homeSource, /sylon-focus-shell/);
+  assert.match(homeSource, /getBoundingClientRect/);
+  assert.match(appSource, /is-workspace-route/);
+  assert.match(workspaceStyles, /\.sylon-focus-shell\.is-active/);
+  assert.match(workspaceStyles, /\.dock:hover/);
+});
+
+test('четыре состояния SYLON переключаются в памяти сессии', () => {
+  assert.deepEqual(SYLON_MODES.map((mode) => mode.id), ['calm', 'attention', 'analysis', 'issue']);
+  const observed = [];
+  const unsubscribe = subscribeSylonMode((mode) => observed.push(mode.id));
+  setSylonMode('calm');
+  cycleSylonMode();
+  assert.equal(getSylonMode().id, 'attention');
+  assert.equal(getSylonMode().linkedRoute, 'schedule');
+  assert.deepEqual(observed.slice(-2), ['calm', 'attention']);
+  unsubscribe();
+  setSylonMode('calm');
+  setSylonMode('calm', { message: 'Реальная сводка', linkedRoute: 'schedule' });
+  assert.equal(getSylonMode().message, 'Реальная сводка');
+  assert.equal(getSylonMode().linkedRoute, 'schedule');
+  setSylonMode('calm');
+});
+
+test('состояние меняет Map, контекст, связанный узел и строку SYLON', () => {
+  assert.match(mapSource, /subscribeSylonMode/);
+  assert.match(mapSource, /mode\.linkedRoute/);
+  assert.match(homeSource, /data-sylon-state-toggle/);
+  assert.match(homeSource, /mode\.linkedRoute/);
+  assert.match(homeStyles, /data-sylon-mode="attention"/);
+  assert.match(homeStyles, /data-sylon-mode="issue"/);
+});
+
+test('Desktop Preview сохраняет профиль данных и показывает фирменный splash', () => {
+  assert.match(desktopMainSource, /setPath\('userData', STABLE_USER_DATA_ROOT\)/);
+  assert.match(desktopMainSource, /desktop-window\.json/);
+  assert.match(desktopMainSource, /createSplashWindow/);
+  assert.match(desktopSplashSource, /Desktop Preview/);
 });
 
 console.log(`\nВсе тесты SYLON Home пройдены: ${passed}`);

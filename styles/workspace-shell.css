@@ -1,0 +1,360 @@
+.menu-bar__identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.menu-bar__identity > i {
+  display: none;
+  width: 28px;
+  height: 1px;
+  margin: 0 11px;
+  background: rgba(190, 178, 143, 0.2);
+}
+
+.menu-bar__section {
+  overflow: hidden;
+  color: rgba(226, 229, 222, 0.46);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-bar__brand > span {
+  display: none;
+}
+
+.sylon-focus-shell {
+  position: fixed;
+  z-index: 40;
+  left: var(--focus-left, 50%);
+  top: var(--focus-top, 50%);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  width: var(--focus-width, 180px);
+  height: var(--focus-height, 100px);
+  overflow: hidden;
+  border: 1px solid rgba(195, 201, 192, 0.13);
+  border-radius: 21px;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  color: #eeede7;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(69, 103, 82, 0.2), transparent 34%),
+    linear-gradient(145deg, rgba(20, 27, 23, 0.98), rgba(8, 11, 9, 0.99));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.45), inset 0 1px rgba(255, 255, 255, 0.035);
+  transition:
+    left 0.58s cubic-bezier(0.22, 0.8, 0.2, 1),
+    top 0.58s cubic-bezier(0.22, 0.8, 0.2, 1),
+    width 0.58s cubic-bezier(0.22, 0.8, 0.2, 1),
+    height 0.58s cubic-bezier(0.22, 0.8, 0.2, 1),
+    border-radius 0.58s cubic-bezier(0.22, 0.8, 0.2, 1),
+    opacity 0.16s;
+}
+
+.sylon-focus-shell.is-preparing {
+  visibility: visible;
+  opacity: 1;
+}
+
+.sylon-focus-shell.is-active {
+  left: 18px;
+  top: 18px;
+  width: calc(100vw - 36px);
+  height: calc(100vh - 36px);
+  border-radius: 30px;
+}
+
+.sylon-focus-shell__mark {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(179, 162, 118, 0.28);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.28s 0.24s, transform 0.45s 0.2s;
+}
+
+.sylon-focus-shell__mark::before,
+.sylon-focus-shell__mark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 28px;
+  border: 1px solid rgba(120, 153, 132, 0.6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(28deg);
+}
+
+.sylon-focus-shell__mark::after {
+  border-color: rgba(183, 153, 94, 0.5);
+  transform: translate(-50%, -50%) rotate(-28deg);
+}
+
+.sylon-focus-shell p,
+.sylon-focus-shell strong,
+.sylon-focus-shell > i {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.28s 0.3s, transform 0.4s 0.27s;
+}
+
+.sylon-focus-shell p {
+  margin: 0 0 8px;
+  color: rgba(224, 227, 220, 0.38);
+  font-size: 0.57rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sylon-focus-shell strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 4vw, 4.2rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+}
+
+.sylon-focus-shell > i {
+  width: 52px;
+  height: 1px;
+  margin-top: 22px;
+  background: rgba(182, 155, 98, 0.35);
+}
+
+.sylon-focus-shell.is-active .sylon-focus-shell__mark,
+.sylon-focus-shell.is-active p,
+.sylon-focus-shell.is-active strong,
+.sylon-focus-shell.is-active > i {
+  opacity: 1;
+  transform: none;
+}
+
+body.is-workspace-route {
+  --bg: #0a0d0b;
+  --surface: #131815;
+  --card: #171d1a;
+  --card-hover: #1c2420;
+  --green: #789b83;
+  --green-dark: #294637;
+  --green-soft: rgba(102, 145, 118, 0.11);
+  --gold: #b99b62;
+  --gold-light: #d8c394;
+  --gold-soft: rgba(185, 155, 98, 0.1);
+  --border: rgba(153, 174, 160, 0.12);
+  --glass: rgba(18, 24, 20, 0.82);
+  background: #090c0a;
+}
+
+body.is-workspace-route .wallpaper {
+  background:
+    radial-gradient(circle at 73% -12%, rgba(66, 94, 76, 0.22), transparent 39%),
+    radial-gradient(circle at -8% 110%, rgba(137, 108, 58, 0.09), transparent 34%),
+    linear-gradient(145deg, #0b0e0c, #080a09);
+}
+
+body.is-workspace-route .menu-bar {
+  top: 18px;
+  width: min(1240px, calc(100% - 44px));
+  height: 46px;
+  padding: 0 4px;
+  border-color: transparent;
+  border-bottom-color: rgba(153, 174, 160, 0.1);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body.is-workspace-route .menu-bar__identity > i,
+body.is-workspace-route .menu-bar__section,
+body.is-workspace-route .menu-bar__brand > span {
+  display: block;
+}
+
+body.is-workspace-route .menu-bar__brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  letter-spacing: 0.15em;
+  font-size: 0.68rem;
+}
+
+body.is-workspace-route .menu-bar__brand > span {
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(180, 162, 116, 0.45);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 4px rgba(77, 112, 89, 0.18);
+}
+
+body.is-workspace-route .menu-bar__brand strong {
+  display: none;
+}
+
+body.is-workspace-route .menu-bar__date {
+  color: rgba(226, 229, 222, 0.32);
+  font-size: 0.65rem;
+}
+
+body.is-workspace-route .system-status {
+  color: rgba(226, 229, 222, 0.34);
+  font-size: 0.64rem;
+}
+
+body.is-workspace-route .system-status i {
+  width: 5px;
+  height: 5px;
+  background: #789b83;
+  box-shadow: 0 0 10px rgba(120, 155, 131, 0.45);
+}
+
+body.is-workspace-route .notification-button {
+  border: 1px solid rgba(153, 174, 160, 0.1);
+  background: rgba(18, 24, 20, 0.55);
+}
+
+body.is-workspace-route .workspace {
+  width: min(1180px, calc(100% - 44px));
+  padding-top: 92px;
+}
+
+body.is-workspace-route .workspace::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  left: 50%;
+  top: 80px;
+  width: min(920px, 80vw);
+  height: 420px;
+  border: 1px solid rgba(153, 174, 160, 0.035);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+body.is-workspace-route .glass-panel {
+  border-color: rgba(153, 174, 160, 0.105);
+  background: rgba(18, 24, 20, 0.74);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22), inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+body.is-workspace-route .dock {
+  width: 64px;
+  height: 64px;
+  padding: 7px;
+  gap: 5px;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-color: rgba(170, 181, 172, 0.12);
+  border-radius: 22px;
+  background: rgba(14, 19, 16, 0.8);
+  transition: width 0.48s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s, background 0.3s;
+}
+
+body.is-workspace-route .dock:hover,
+body.is-workspace-route .dock:focus-within {
+  width: min(586px, calc(100% - 20px));
+  border-color: rgba(170, 181, 172, 0.2);
+  background: rgba(14, 19, 16, 0.94);
+}
+
+body.is-workspace-route .dock-item {
+  flex: 0 0 50px;
+  width: 50px;
+  height: 50px;
+}
+
+body.is-workspace-route .dock-item__icon {
+  width: 42px;
+  height: 42px;
+  border-color: transparent;
+  border-radius: 14px;
+  background: transparent;
+}
+
+body.is-workspace-route .dock-item:first-child .dock-item__icon {
+  color: #c9b780;
+  border-color: rgba(185, 155, 98, 0.2);
+  background: radial-gradient(circle, rgba(74, 111, 87, 0.18), rgba(16, 22, 18, 0.7));
+}
+
+body.is-workspace-route .dock-item:hover .dock-item__icon {
+  transform: none;
+  color: #d8c394;
+  background: rgba(102, 145, 118, 0.1);
+}
+
+body.is-workspace-route .dock-item__label {
+  bottom: 58px;
+}
+
+body.is-returning-home .workspace > .view {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+@media (max-width: 720px) {
+  .sylon-focus-shell.is-active {
+    left: 8px;
+    top: 8px;
+    width: calc(100vw - 16px);
+    height: calc(100vh - 16px);
+    border-radius: 24px;
+  }
+
+  body.is-workspace-route .menu-bar {
+    top: 8px;
+    width: calc(100% - 20px);
+    grid-template-columns: 1fr auto;
+  }
+
+  body.is-workspace-route .menu-bar__identity > i {
+    width: 16px;
+    margin-inline: 8px;
+  }
+
+  body.is-workspace-route .workspace {
+    width: calc(100% - 20px);
+    padding-top: 72px;
+  }
+
+  body.is-workspace-route .dock {
+    bottom: 8px;
+    width: 58px;
+    height: 58px;
+    padding: 5px;
+    border-radius: 19px;
+  }
+
+  body.is-workspace-route .dock:hover,
+  body.is-workspace-route .dock:focus-within {
+    width: calc(100% - 12px);
+  }
+
+  body.is-workspace-route .dock-item {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+  }
+
+  body.is-workspace-route .dock-item__icon {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sylon-focus-shell,
+  .sylon-focus-shell *,
+  body.is-workspace-route .dock {
+    transition: none !important;
+  }
+}

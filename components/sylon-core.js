@@ -1,4 +1,10 @@
-import { createSylonInteractionState, getSylonQualityProfile } from '../core/sylon-state.js';
+import {
+  createSylonInteractionState,
+  getSylonQualityProfile,
+  rememberSylonInteractionState,
+  subscribeSylonMode,
+  SYLON_MODULES
+} from '../core/sylon-state.js';
 
 export function supportsWebGL(documentRef = globalThis.document) {
   try {
@@ -75,8 +81,9 @@ export async function initSylonCore(container) {
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.className = 'sylon-core__canvas';
-  renderer.domElement.setAttribute('aria-label', 'Интерактивное ядро SYLON. Перетаскивайте для вращения, колесо меняет глубину.');
+  renderer.domElement.setAttribute('aria-label', 'Интерактивное ядро SYLON. Перетаскивайте или используйте стрелки, чтобы исследовать модули.');
   renderer.domElement.setAttribute('role', 'img');
+  renderer.domElement.tabIndex = 0;
   container.replaceChildren(renderer.domElement);
   container.dataset.coreMode = 'webgl';
   container.dataset.quality = profile.tier;
@@ -123,12 +130,14 @@ export async function initSylonCore(container) {
 
   const nodeMaterial = new THREE.MeshStandardMaterial({ color: 0xe0d1a1, emissive: 0x8e7440, emissiveIntensity: 0.9, roughness: 0.35 });
   const nodes = [];
+  const activeRoutes = SYLON_MODULES.filter((module) => module.active).map((module) => module.route);
   for (let index = 9; index < helixA.points.length - 4; index += 14) {
     for (const point of [helixA.points[index], helixB.points[index]]) {
       const node = new THREE.Mesh(new THREE.IcosahedronGeometry(0.075, 1), nodeMaterial.clone());
       node.position.copy(point);
       node.scale.set(1.25, 0.86, 1);
       node.userData.phase = index * 0.19 + nodes.length;
+      node.userData.route = activeRoutes[Math.floor(nodes.length / 2) % activeRoutes.length];
       nodes.push(node);
       core.add(node);
     }
@@ -170,6 +179,16 @@ export async function initSylonCore(container) {
   let adaptiveApplied = false;
   let pointerId = null;
   let previousPointerX = 0;
+  let orbitDragDistance = 0;
+  let requestReducedRender = () => {};
+
+  const unsubscribeMode = subscribeSylonMode((mode) => {
+    state.mode = mode.id;
+    state.modeRoute = mode.linkedRoute;
+    state.modeEnteredAt = performance.now();
+    container.dataset.sylonMode = mode.id;
+    requestReducedRender();
+  });
 
   const resize = () => {
     const width = Math.max(1, container.clientWidth);
@@ -186,14 +205,18 @@ export async function initSylonCore(container) {
     lastTime = time;
 
     if (!profile.reducedMotion) {
-      state.targetRotation += 0.045 * delta;
+      const analyzingPause = state.mode === 'analysis' && time - state.modeEnteredAt < 680;
+      const rotationSpeed = state.mode === 'analysis' ? 0.014 : state.mode === 'issue' ? 0.03 : 0.045;
+      if (!analyzingPause) state.targetRotation += rotationSpeed * delta;
       state.velocity *= Math.pow(0.025, delta);
       state.targetRotation += state.velocity * delta;
       state.rotation += (state.targetRotation - state.rotation) * Math.min(1, delta * 4.2);
       state.depth += (state.targetDepth - state.depth) * Math.min(1, delta * 5);
-      const breath = 1 + Math.sin(elapsed * 0.72) * 0.018;
+      const breathSpeed = state.mode === 'issue' ? 1.24 : state.mode === 'attention' ? 0.9 : 0.72;
+      const breathAmount = state.mode === 'analysis' ? 0.008 : state.mode === 'attention' ? 0.022 : 0.018;
+      const breath = 1 + Math.sin(elapsed * breathSpeed) * breathAmount;
       core.scale.setScalar(breath);
-      particles.rotation.y -= delta * 0.035;
+      particles.rotation.y -= delta * (state.mode === 'analysis' ? 0.19 : state.mode === 'attention' ? 0.06 : 0.035);
     }
 
     core.rotation.y = state.rotation + state.pointerX * 0.08;
@@ -201,11 +224,23 @@ export async function initSylonCore(container) {
     camera.position.z = state.depth;
     const hoverStrength = state.hoveredModule ? 0.9 : 0;
     nodes.forEach((node) => {
-      const pulse = profile.reducedMotion ? 0 : Math.max(0, Math.sin(elapsed * 1.45 + node.userData.phase));
-      node.material.emissiveIntensity = 0.72 + pulse * 0.5 + hoverStrength;
-      node.scale.setScalar(1 + pulse * 0.09 + hoverStrength * 0.08);
+      const isModeTarget = state.modeRoute && node.userData.route === state.modeRoute;
+      const isHoverTarget = state.hoveredModule && node.userData.route === state.hoveredModule;
+      const pulseRate = state.mode === 'analysis' ? 4.2 : state.mode === 'issue' && isModeTarget ? 2.6 : 1.45;
+      const pulse = profile.reducedMotion ? 0 : Math.max(0, Math.sin(elapsed * pulseRate + node.userData.phase));
+      const modeStrength = isModeTarget ? (state.mode === 'issue' ? 1.25 : 0.72) : 0;
+      node.material.emissive.setHex(
+        state.mode === 'analysis' ? 0x3d775f
+          : state.mode === 'issue' && isModeTarget ? 0x8f3f28
+            : state.mode === 'attention' && isModeTarget ? 0xa87935
+              : 0x6f633f
+      );
+      node.material.emissiveIntensity = 0.65 + pulse * 0.48 + modeStrength + (isHoverTarget ? hoverStrength : 0);
+      node.scale.setScalar(1 + pulse * 0.08 + modeStrength * 0.07 + (isHoverTarget ? 0.08 : 0));
     });
-    warmLight.intensity = 4.2 + Math.sin(elapsed * 0.58) * 0.35 + hoverStrength;
+    warmLight.color.setHex(state.mode === 'issue' ? 0xb76b4b : state.mode === 'analysis' ? 0x79a98d : 0xe0b46c);
+    particles.material.color.setHex(state.mode === 'analysis' ? 0xa9cbbb : state.mode === 'issue' ? 0xb79882 : 0xa7bea9);
+    warmLight.intensity = 4.2 + Math.sin(elapsed * 0.58) * 0.35 + hoverStrength + (state.mode === 'attention' ? 0.7 : 0);
     renderer.render(scene, camera);
 
     sampledFrames += 1;
@@ -226,7 +261,7 @@ export async function initSylonCore(container) {
     frameId = requestAnimationFrame(tick);
   };
 
-  const requestReducedRender = () => {
+  requestReducedRender = () => {
     if (profile.reducedMotion && visible) render(performance.now());
   };
 
@@ -247,6 +282,13 @@ export async function initSylonCore(container) {
       const movement = event.clientX - previousPointerX;
       state.targetRotation += movement * 0.009;
       state.velocity = movement * 0.13;
+      orbitDragDistance += movement;
+      if (Math.abs(orbitDragDistance) >= 86) {
+        container.dispatchEvent(new CustomEvent('sylon:orbit-step', {
+          detail: { direction: orbitDragDistance < 0 ? 1 : -1 }
+        }));
+        orbitDragDistance = 0;
+      }
       previousPointerX = event.clientX;
     }
     requestReducedRender();
@@ -272,6 +314,14 @@ export async function initSylonCore(container) {
     container.dataset.linkedModule = state.hoveredModule || '';
     requestReducedRender();
   };
+  const onKeyDown = (event) => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    const direction = event.key === 'ArrowRight' ? 1 : -1;
+    state.targetRotation += direction * 0.58;
+    container.dispatchEvent(new CustomEvent('sylon:orbit-step', { detail: { direction } }));
+    requestReducedRender();
+  };
 
   const canvas = renderer.domElement;
   canvas.addEventListener('pointerdown', onPointerDown);
@@ -280,6 +330,7 @@ export async function initSylonCore(container) {
   canvas.addEventListener('pointercancel', endDrag);
   canvas.addEventListener('pointerleave', endDrag);
   canvas.addEventListener('wheel', onWheel, { passive: false });
+  canvas.addEventListener('keydown', onKeyDown);
   window.addEventListener('resize', resize, { passive: true });
   document.addEventListener('visibilitychange', onVisibility);
   container.addEventListener('sylon:module-hover', onModuleHover);
@@ -290,6 +341,7 @@ export async function initSylonCore(container) {
 
   return () => {
     disposed = true;
+    rememberSylonInteractionState(state);
     cancelAnimationFrame(frameId);
     canvas.removeEventListener('pointerdown', onPointerDown);
     canvas.removeEventListener('pointermove', onPointerMove);
@@ -297,9 +349,11 @@ export async function initSylonCore(container) {
     canvas.removeEventListener('pointercancel', endDrag);
     canvas.removeEventListener('pointerleave', endDrag);
     canvas.removeEventListener('wheel', onWheel);
+    canvas.removeEventListener('keydown', onKeyDown);
     window.removeEventListener('resize', resize);
     document.removeEventListener('visibilitychange', onVisibility);
     container.removeEventListener('sylon:module-hover', onModuleHover);
+    unsubscribeMode();
     disposeObject(core);
     renderer.dispose();
     renderer.forceContextLoss?.();

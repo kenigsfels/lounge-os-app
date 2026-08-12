@@ -95,6 +95,19 @@ export async function loadScheduleData() {
   return normalizeScheduleData(readStorage('schedule', EMPTY_SCHEDULE));
 }
 
+export async function readScheduleSnapshot() {
+  try {
+    if (globalThis.sylon?.schedule?.load) {
+      const desktopSchedule = normalizeScheduleData(await globalThis.sylon.schedule.load());
+      if (hasScheduleData(desktopSchedule)) return desktopSchedule;
+    }
+  } catch {
+    // Reading the local cache below keeps the briefing available without changing data.
+  }
+
+  return normalizeScheduleData(readStorage('schedule', EMPTY_SCHEDULE));
+}
+
 export function parseLocalDate(value) {
   const normalized = String(value ?? '').trim();
   return normalized ? new Date(`${normalized}T12:00:00`) : null;

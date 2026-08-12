@@ -22,8 +22,12 @@ assert.ok(existsSync(join(root, 'public', 'icons', 'icon-maskable-512.png')));
 console.log('✓ иконки Android и iPhone входят в сборку');
 
 const serviceWorker = readFileSync(join(root, 'public', 'service-worker.js'), 'utf8');
+const pwaSource = readFileSync(join(root, 'core', 'pwa.js'), 'utf8');
 assert.match(serviceWorker, /request\.mode === 'navigate'/);
 assert.match(serviceWorker, /url\.origin !== self\.location\.origin/);
 assert.match(serviceWorker, /caches\.match\('\.\/index\.html'\)/);
 assert.match(serviceWorker, /LEGACY_CACHE_PREFIX/);
+assert.match(serviceWorker, /sylon-map/);
+assert.match(pwaSource, /import\.meta\.env\?\.DEV/);
+assert.match(pwaSource, /getRegistrations/);
 console.log('✓ service worker сохраняет оболочку и не кэширует Supabase-запросы');

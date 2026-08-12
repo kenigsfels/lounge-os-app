@@ -1,13 +1,18 @@
-const { app, BrowserWindow, ipcMain, shell, session } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, session, screen } = require('electron');
 const fs = require('node:fs/promises');
+const fsSync = require('node:fs');
 const path = require('node:path');
 
 const APP_ID = 'com.kenigsfels.sylon.os';
 const PROTOCOL = 'sylon';
+const STABLE_USER_DATA_ROOT = path.join(app.getPath('appData'), 'sylon-os');
+app.setPath('userData', STABLE_USER_DATA_ROOT);
 const DEV_SERVER_URL = process.env.SYLON_DEV_SERVER_URL;
 const DATA_ROOT = process.env.SYLON_DATA_ROOT
   || path.join(process.env.USERPROFILE || '', 'Desktop', 'SYLON', 'SYLON OS', 'data');
 const SCHEDULE_DATA_PATH = path.join(DATA_ROOT, 'schedule', 'app-schedule.json');
+const WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'desktop-window.json');
+const PREVIEW_LABEL = 'Desktop Preview';
 const ALLOWED_ROUTES = new Set([
   'dashboard',
   'employees',
@@ -21,6 +26,8 @@ const ALLOWED_ROUTES = new Set([
 ]);
 
 let mainWindow;
+let splashWindow;
+let splashStartedAt = 0;
 let pendingRoute = getRouteFromArguments(process.argv);
 
 ipcMain.handle('schedule:load', async () => {
@@ -33,6 +40,13 @@ ipcMain.handle('schedule:load', async () => {
     return { version: 1, currentWeek: '', source: null, weeks: [] };
   }
 });
+
+ipcMain.handle('app:info', () => ({
+  name: 'SYLON',
+  version: app.getVersion(),
+  channel: PREVIEW_LABEL,
+  dataRoot: DATA_ROOT
+}));
 
 app.setAppUserModelId(APP_ID);
 app.enableSandbox();
@@ -117,6 +131,70 @@ function loadApplication(route = null) {
   return mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'), { hash });
 }
 
+function readWindowState() {
+  try {
+    const stored = JSON.parse(fsSync.readFileSync(WINDOW_STATE_PATH, 'utf8'));
+    const bounds = stored?.bounds;
+    if (!bounds || !Number.isFinite(bounds.width) || !Number.isFinite(bounds.height)) return null;
+    const visible = screen.getAllDisplays().some((display) => {
+      const area = display.workArea;
+      return bounds.x < area.x + area.width && bounds.x + bounds.width > area.x
+        && bounds.y < area.y + area.height && bounds.y + bounds.height > area.y;
+    });
+    return visible ? { bounds, maximized: Boolean(stored.maximized) } : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveWindowState() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    const state = {
+      bounds: mainWindow.isMaximized() ? mainWindow.getNormalBounds() : mainWindow.getBounds(),
+      maximized: mainWindow.isMaximized()
+    };
+    fsSync.writeFileSync(WINDOW_STATE_PATH, JSON.stringify(state, null, 2), 'utf8');
+  } catch {
+    // Window persistence is helpful, but never blocks the application from closing.
+  }
+}
+
+function createSplashWindow() {
+  splashStartedAt = Date.now();
+  splashWindow = new BrowserWindow({
+    width: 520,
+    height: 360,
+    show: false,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    backgroundColor: '#00000000',
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true
+    }
+  });
+  splashWindow.loadFile(path.join(__dirname, 'splash.html'));
+  splashWindow.once('ready-to-show', () => splashWindow?.show());
+  splashWindow.on('closed', () => { splashWindow = null; });
+}
+
+function revealMainWindow() {
+  const remaining = Math.max(0, 1150 - (Date.now() - splashStartedAt));
+  setTimeout(() => {
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    splashWindow?.close();
+    if (mainWindow.isMaximized()) mainWindow.show();
+    else mainWindow.show();
+    mainWindow.focus();
+  }, remaining);
+}
+
 function showMainWindow(route = null) {
   if (!mainWindow || mainWindow.isDestroyed()) {
     pendingRoute = route || pendingRoute;
@@ -133,10 +211,10 @@ function showMainWindow(route = null) {
 }
 
 function createWindow() {
+  const previousState = readWindowState();
   mainWindow = new BrowserWindow({
-    title: 'SYLON OS',
-    width: 1440,
-    height: 900,
+    title: 'SYLON — Desktop Preview',
+    ...(previousState?.bounds || { width: 1440, height: 900 }),
     minWidth: 1024,
     minHeight: 700,
     show: false,
@@ -166,12 +244,15 @@ function createWindow() {
   });
 
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+    if (previousState?.maximized) mainWindow.maximize();
+    revealMainWindow();
   });
 
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  mainWindow.on('close', saveWindowState);
 
   loadApplication(pendingRoute);
   pendingRoute = null;
@@ -182,6 +263,7 @@ app.whenReady().then(() => {
     callback(false);
   });
 
+  createSplashWindow();
   createWindow();
 
   app.on('activate', () => {

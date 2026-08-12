@@ -11,7 +11,12 @@ function formatCurrentDate() {
 export function renderHeader() {
   return `
     <div class="menu-bar">
-      <a class="menu-bar__brand" href="#dashboard" data-home>SYLON <strong>OS</strong></a>
+      <div class="menu-bar__identity">
+        <a class="menu-bar__brand" href="#dashboard" data-home><span aria-hidden="true"></span>SYLON <strong>OS</strong></a>
+        ${globalThis.sylon?.desktop?.preview ? '<em class="desktop-preview-label">Preview</em>' : ''}
+        <i></i>
+        <span class="menu-bar__section" data-workspace-section></span>
+      </div>
       <time class="menu-bar__date">${formatCurrentDate()}</time>
       <div class="menu-bar__system">
         <span class="system-status"><i></i><span>Система активна</span></span>
