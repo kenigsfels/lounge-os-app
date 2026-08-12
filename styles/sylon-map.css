@@ -33,6 +33,17 @@
   animation: sylon-map-atmosphere 18s ease-in-out infinite alternate;
 }
 
+.sylon-home--map .sylon-home__atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: -8%;
+  opacity: .18;
+  background-image: radial-gradient(circle, rgba(227, 225, 211, .17) 0 .55px, transparent .7px);
+  background-size: 5px 5px;
+  mask-image: radial-gradient(ellipse at 66% 50%, #000 0, transparent 72%);
+  animation: sylon-map-grain 12s steps(2, end) infinite;
+}
+
 .sylon-map-path {
   position: absolute;
   z-index: 8;
@@ -66,6 +77,31 @@
   height: min(820px, 89vh);
   transform: translate(-50%, -50%);
   perspective: 1300px;
+}
+
+.sylon-map-stage::before,
+.sylon-map-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .38;
+}
+
+.sylon-map-stage::before {
+  left: 7%;
+  right: 6%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(151, 173, 158, .06) 18%, rgba(196, 181, 137, .11) 50%, rgba(151, 173, 158, .05) 82%, transparent);
+}
+
+.sylon-map-stage::after {
+  top: 7%;
+  bottom: 6%;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(151, 173, 158, .05) 22%, rgba(196, 181, 137, .1) 50%, rgba(151, 173, 158, .04) 78%, transparent);
 }
 
 .sylon-map-layer,
@@ -146,6 +182,13 @@
   opacity: 0.42;
 }
 
+.sylon-map-edge--halo {
+  stroke: rgba(101, 145, 116, .13);
+  stroke-width: 4.6;
+  opacity: .1;
+  filter: blur(2.8px);
+}
+
 .sylon-map-edge-group[data-source="sylon"] .sylon-map-edge--base { opacity: 0.78; }
 
 .sylon-map-edge--signal {
@@ -166,7 +209,9 @@
 
 .sylon-map-edge-group:not([data-source="sylon"]) .sylon-map-edge--base { stroke-dasharray: 1.2 3.5; opacity: 0.025; }
 .sylon-map-edge-group:not([data-source="sylon"]) .sylon-map-edge--signal { opacity: 0; }
+.sylon-map-edge-group:not([data-source="sylon"]) .sylon-map-edge--halo { opacity: 0; }
 
+.sylon-map-edge-group.is-related .sylon-map-edge--halo { stroke: rgba(199, 175, 111, .24); stroke-width: 7; opacity: .46; }
 .sylon-map-edge-group.is-related .sylon-map-edge--base { stroke: var(--map-line-active); stroke-width: 1.12; opacity: 0.92; }
 .sylon-map-edge-group.is-related .sylon-map-edge--signal { stroke-width: 1.9; opacity: 1; animation-duration: 3.8s; }
 
@@ -247,7 +292,19 @@
 
 .sylon-map-node__object b { position: absolute; right: 14px; top: 18px; width: 3px; height: 3px; border-radius: 50%; background: rgba(238, 231, 207, 0.75); box-shadow: 0 0 10px rgba(238, 214, 156, 0.45); }
 
+.sylon-map-node__object > span {
+  position: absolute;
+  left: 9px;
+  bottom: 8px;
+  color: rgba(var(--node-accent), .46);
+  font-size: .42rem;
+  font-weight: 650;
+  letter-spacing: .12em;
+  transform: rotate(-12deg);
+}
+
 .sylon-map-node__copy {
+  position: relative;
   display: block;
   min-width: 135px;
   padding: 13px 15px;
@@ -258,6 +315,16 @@
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   transition: background 0.4s, border-color 0.4s, transform 0.45s, opacity 0.4s, box-shadow 0.4s;
+}
+
+.sylon-map-node:not(.sylon-map-node--root) .sylon-map-node__copy::after {
+  content: "↗";
+  position: absolute;
+  right: 11px;
+  bottom: 10px;
+  color: rgba(var(--node-accent), .35);
+  font-size: .65rem;
+  transition: color .35s ease, transform .45s cubic-bezier(.2,.8,.2,1);
 }
 
 .sylon-map-node__copy small,
@@ -282,6 +349,10 @@
   box-shadow: inset 0 1px rgba(255,255,255,.04), 0 22px 56px rgba(0,0,0,.22);
   transform: translateX(6px);
 }
+
+.sylon-map-node:hover .sylon-map-node__copy::after,
+.sylon-map-node:focus-visible .sylon-map-node__copy::after,
+.sylon-map-node.is-neighbor .sylon-map-node__copy::after { color: rgba(var(--node-accent), .86); transform: translate(2px,-2px); }
 
 .sylon-map-node:focus-visible .sylon-map-node__object { outline: 1px solid rgba(221, 210, 176, 0.72); outline-offset: 6px; }
 
@@ -316,6 +387,7 @@
 .sylon-map-node--root .sylon-map-node__object::after { inset: -13px; border-color: rgba(124, 160, 137, 0.15); border-right-color: transparent; animation-duration: 42s; }
 .sylon-map-node--root .sylon-map-node__object i { width: 25px; height: 25px; border-radius: 5px; background: #c9b47e; box-shadow: 0 0 36px rgba(201,180,126,.48), 0 0 80px rgba(151,130,74,.2); }
 .sylon-map-node--root .sylon-map-node__object b { right: 27px; top: 31px; width: 4px; height: 4px; }
+.sylon-map-node--root .sylon-map-node__object > span { left: 20px; bottom: 17px; color: rgba(207, 188, 137, .48); }
 .sylon-map-node--root .sylon-map-node__copy { border-color: rgba(199, 184, 141, 0.08); background: linear-gradient(135deg, rgba(31,39,34,.54), rgba(14,18,16,.25)); }
 .sylon-map-node--root .sylon-map-node__copy strong { font-size: 1.08rem; letter-spacing: 0.17em; }
 .sylon-map-node--root .sylon-map-node__copy em { color: rgba(205, 194, 163, 0.48); }
@@ -367,6 +439,7 @@
 .sylon-home--map.is-opening .sylon-map-node.is-adjacent { opacity: .08; }
 
 @keyframes sylon-map-atmosphere { 0%{transform:translate3d(-1%,0,0) scale(1)} 100%{transform:translate3d(1.5%,-1%,0) scale(1.04)} }
+@keyframes sylon-map-grain { 0%,100%{transform:translate3d(0,0,0)} 35%{transform:translate3d(2px,-1px,0)} 70%{transform:translate3d(-1px,2px,0)} }
 @keyframes sylon-map-breathe { 0%,100%{transform:translate(-50%,-50%) scale(.96);opacity:.6} 48%,58%{transform:translate(-50%,-50%) scale(1.04);opacity:1} }
 @keyframes sylon-map-orbit { to{transform:translate(-50%,-50%) rotate(348deg)} }
 @keyframes sylon-map-flow { to{stroke-dashoffset:0} }
@@ -426,6 +499,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sylon-home--map .sylon-home__atmosphere,
+  .sylon-home--map .sylon-home__atmosphere::after,
   .sylon-map-depth::before,
   .sylon-map-depth i,
   .sylon-map-edge--signal,

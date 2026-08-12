@@ -34,6 +34,7 @@ function renderMapEdge(edge, index) {
     <g class="sylon-map-edge-group" data-map-edge="${edge.id}"
       data-source="${edge.source}" data-target="${edge.target}">
       <title>${source.label} — ${edge.relation} — ${target.label}</title>
+      <path class="sylon-map-edge sylon-map-edge--halo" d="${path}" pathLength="1"></path>
       <path class="sylon-map-edge sylon-map-edge--base" d="${path}" pathLength="1"></path>
       <path class="sylon-map-edge sylon-map-edge--signal" d="${path}" pathLength="1"></path>
     </g>`;
@@ -47,7 +48,7 @@ function renderMapNode(node, index) {
   return `
     <button class="sylon-map-node sylon-map-node--${isRoot ? 'root' : node.tone}"
       type="button" data-map-node="${node.id}" data-node-index="${index}" ${attributes}>
-      <span class="sylon-map-node__object" aria-hidden="true"><i></i><b></b></span>
+      <span class="sylon-map-node__object" aria-hidden="true"><i></i><b></b><span>${isRoot ? '00' : String(index).padStart(2, '0')}</span></span>
       <span class="sylon-map-node__copy">
         ${isRoot ? '<small>Живая карта</small>' : `<small>Связь 0${index}</small>`}
         <strong>${node.label}</strong>
