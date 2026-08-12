@@ -120,8 +120,12 @@ test('сцена держит навигационный путь в DOM и не
 test('узел раскрывается в рабочую оболочку, а Dock остаётся резервной навигацией', () => {
   assert.match(homeSource, /sylon-focus-shell/);
   assert.match(homeSource, /getBoundingClientRect/);
+  assert.match(homeSource, /dataset\.focusNode/);
+  assert.match(homeSource, /dataset\.openingNode/);
   assert.match(appSource, /is-workspace-route/);
   assert.match(workspaceStyles, /\.sylon-focus-shell\.is-active/);
+  assert.match(workspaceStyles, /clip-path:circle/);
+  assert.match(workspaceStyles, /sylon-map-unfold/);
   assert.match(workspaceStyles, /\.dock:hover/);
 });
 

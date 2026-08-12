@@ -301,13 +301,83 @@ body.is-returning-home .workspace > .view {
   transform: scale(0.985);
 }
 
+/* Map portal: the selected node expands into the existing SPA workspace. */
+.sylon-focus-shell {
+  --portal-x: 64%;
+  --portal-y: 49%;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at var(--portal-x) var(--portal-y), rgba(174, 148, 89, .18), transparent 12%),
+    radial-gradient(circle at var(--portal-x) var(--portal-y), rgba(71, 112, 85, .28), transparent 38%),
+    linear-gradient(145deg, rgba(13,19,16,.995), rgba(6,9,7,.998));
+  clip-path: circle(0 at var(--portal-x) var(--portal-y));
+  transition: clip-path .74s cubic-bezier(.2,.82,.18,1), opacity .14s;
+}
+
+.sylon-focus-shell[data-focus-node="employees"] { --portal-x: 43%; --portal-y: 29%; }
+.sylon-focus-shell[data-focus-node="schedule"] { --portal-x: 85%; --portal-y: 27%; }
+.sylon-focus-shell[data-focus-node="tasks"] { --portal-x: 43%; --portal-y: 71%; }
+.sylon-focus-shell[data-focus-node="warehouse"] { --portal-x: 86%; --portal-y: 67%; }
+
+.sylon-focus-shell.is-preparing { clip-path: circle(46px at var(--portal-x) var(--portal-y)); }
+.sylon-focus-shell.is-active { left:0;top:0;width:100vw;height:100vh;border-radius:0;clip-path:circle(145vmax at var(--portal-x) var(--portal-y)); }
+
+.sylon-focus-shell::before,
+.sylon-focus-shell::after {
+  content:"";
+  position:absolute;
+  left:var(--portal-x);
+  top:var(--portal-y);
+  width:42vmax;
+  height:42vmax;
+  border:1px solid rgba(164,186,170,.08);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  opacity:0;
+  transition:opacity .35s .15s, transform .74s cubic-bezier(.2,.82,.18,1);
+}
+
+.sylon-focus-shell::after { width:68vmax;height:68vmax;border-color:rgba(194,166,105,.055);transform:translate(-50%,-50%) rotate(20deg); }
+.sylon-focus-shell.is-active::before { opacity:1;transform:translate(-50%,-50%) scale(1.45); }
+.sylon-focus-shell.is-active::after { opacity:1;transform:translate(-50%,-50%) rotate(70deg) scale(1.2); }
+
+.sylon-focus-shell__mark { width:58px;height:58px;margin-bottom:20px;border-color:rgba(182,158,99,.36);box-shadow:0 0 50px rgba(128,157,135,.12); }
+.sylon-focus-shell__mark::before { left:8px;top:8px;right:8px;bottom:8px;width:auto;height:auto;border-color:rgba(124,159,137,.42);border-left-color:transparent;border-radius:50%;transform:rotate(28deg); }
+.sylon-focus-shell__mark::after { left:50%;top:50%;width:14px;height:14px;border:0;border-radius:3px;background:#c9b47e;box-shadow:0 0 28px rgba(201,180,126,.42);transform:translate(-50%,-50%) rotate(45deg); }
+.sylon-focus-shell__mark span { position:absolute;inset:-8px;border:1px solid rgba(124,159,137,.15);border-right-color:transparent;border-radius:50%;animation:sylon-portal-ring 7s linear infinite; }
+
+body.is-workspace-route .workspace > .view { animation:sylon-workspace-arrive .62s cubic-bezier(.2,.8,.2,1) both; }
+body.is-returning-home .sylon-home { animation:sylon-map-return .68s cubic-bezier(.18,.82,.2,1) both; }
+
+::view-transition-old(root) { animation:sylon-view-old .48s cubic-bezier(.2,.8,.2,1) both; }
+::view-transition-new(root) { animation:sylon-view-new .56s cubic-bezier(.2,.8,.2,1) both; }
+html:has(body.is-returning-home)::view-transition-old(root) { animation:sylon-workspace-fold .5s cubic-bezier(.3,.05,.2,1) both; }
+html:has(body.is-returning-home)::view-transition-new(root) { animation:sylon-map-unfold .66s cubic-bezier(.18,.82,.2,1) both; }
+
+@keyframes sylon-portal-ring { to{transform:rotate(360deg)} }
+@keyframes sylon-workspace-arrive { from{opacity:0;transform:translateY(12px) scale(.992);filter:blur(5px)} to{opacity:1;transform:none;filter:none} }
+@keyframes sylon-map-return { from{opacity:0;transform:scale(.96);filter:blur(8px)} to{opacity:1;transform:none;filter:none} }
+@keyframes sylon-view-old { to{opacity:0;transform:scale(.985);filter:blur(4px)} }
+@keyframes sylon-view-new { from{opacity:0;transform:scale(1.012);filter:blur(5px)} }
+@keyframes sylon-workspace-fold { to{opacity:0;transform:scale(.94);filter:blur(8px)} }
+@keyframes sylon-map-unfold { from{opacity:0;transform:scale(.9);filter:blur(10px)} }
+
 @media (max-width: 720px) {
+  .sylon-focus-shell[data-focus-node="employees"] { --portal-x:17%;--portal-y:36%; }
+  .sylon-focus-shell[data-focus-node="schedule"] { --portal-x:70%;--portal-y:35%; }
+  .sylon-focus-shell[data-focus-node="tasks"] { --portal-x:17%;--portal-y:69%; }
+  .sylon-focus-shell[data-focus-node="warehouse"] { --portal-x:70%;--portal-y:67%; }
   .sylon-focus-shell.is-active {
-    left: 8px;
-    top: 8px;
-    width: calc(100vw - 16px);
-    height: calc(100vh - 16px);
-    border-radius: 24px;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
   }
 
   body.is-workspace-route .menu-bar {
@@ -357,4 +427,7 @@ body.is-returning-home .workspace > .view {
   body.is-workspace-route .dock {
     transition: none !important;
   }
+  .sylon-focus-shell__mark span,
+  body.is-workspace-route .workspace > .view,
+  body.is-returning-home .sylon-home { animation:none!important; }
 }

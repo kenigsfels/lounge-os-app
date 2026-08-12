@@ -40,6 +40,7 @@ export async function initSylonMap(container, map = SYLON_MAP) {
 
   const profile = getSylonQualityProfile();
   const scene = new THREE.Scene();
+  const interactionSurface = container.closest('[data-map-stage]') || container;
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 30);
   camera.position.set(0, 0, 8.4);
   let targetDepth = 8.4;
@@ -164,6 +165,8 @@ export async function initSylonMap(container, map = SYLON_MAP) {
   let modeRoute = null;
   let pointerX = 0;
   let pointerY = 0;
+  let targetGraphX = 0;
+  let targetGraphY = 0;
   let requestReducedRender = () => {};
 
   const unsubscribeMode = subscribeSylonMode((mode) => {
@@ -188,6 +191,8 @@ export async function initSylonMap(container, map = SYLON_MAP) {
     if (!profile.reducedMotion) {
       graph.rotation.y += (pointerX * 0.045 - graph.rotation.y) * Math.min(1, delta * 2.2);
       graph.rotation.x += (-0.025 + pointerY * 0.025 - graph.rotation.x) * Math.min(1, delta * 2.2);
+      graph.position.x += (targetGraphX - graph.position.x) * Math.min(1, delta * 4.2);
+      graph.position.y += (targetGraphY - graph.position.y) * Math.min(1, delta * 4.2);
       dust.rotation.z = elapsed * 0.006;
       hubRings.children.forEach((ring, index) => {
         ring.rotation.z += delta * ring.userData.speed;
@@ -231,7 +236,7 @@ export async function initSylonMap(container, map = SYLON_MAP) {
     if (profile.reducedMotion && visible) render(performance.now());
   };
   const onPointerMove = (event) => {
-    const bounds = container.getBoundingClientRect();
+    const bounds = interactionSurface.getBoundingClientRect();
     pointerX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
     pointerY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
   };
@@ -241,6 +246,9 @@ export async function initSylonMap(container, map = SYLON_MAP) {
   };
   const onFocus = (event) => {
     focusedId = event.detail?.nodeId || map.rootId;
+    const focusedPoint = pointById.get(focusedId);
+    targetGraphX = focusedId === map.rootId || !focusedPoint ? 0 : -focusedPoint.x * 0.16;
+    targetGraphY = focusedId === map.rootId || !focusedPoint ? 0 : -focusedPoint.y * 0.12;
     targetDepth = focusedId === map.rootId ? 8.4 : 6.6;
     if (profile.reducedMotion) render(performance.now());
   };
@@ -250,7 +258,7 @@ export async function initSylonMap(container, map = SYLON_MAP) {
     if (visible && profile.reducedMotion) render(lastTime);
   };
 
-  container.addEventListener('pointermove', onPointerMove, { passive: true });
+  interactionSurface.addEventListener('pointermove', onPointerMove, { passive: true });
   container.addEventListener('sylon:map-hover', onHover);
   container.addEventListener('sylon:map-focus', onFocus);
   window.addEventListener('resize', resize, { passive: true });
@@ -262,7 +270,7 @@ export async function initSylonMap(container, map = SYLON_MAP) {
   return () => {
     disposed = true;
     cancelAnimationFrame(frameId);
-    container.removeEventListener('pointermove', onPointerMove);
+    interactionSurface.removeEventListener('pointermove', onPointerMove);
     container.removeEventListener('sylon:map-hover', onHover);
     container.removeEventListener('sylon:map-focus', onFocus);
     window.removeEventListener('resize', resize);

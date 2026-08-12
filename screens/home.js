@@ -1,7 +1,7 @@
 import { getEmployees } from '../core/employees.js';
 import { loadSylonBriefing } from '../core/sylon-briefing.js';
 import { cycleSylonMode, setSylonMode, subscribeSylonMode } from '../core/sylon-state.js';
-import { getMapNode, getVisibleMapNodes, SYLON_MAP } from '../core/sylon-map-model.js';
+import { getMapNeighbors, getMapNode, getVisibleMapNodes, SYLON_MAP } from '../core/sylon-map-model.js';
 import { initSylonMap } from '../components/sylon-map.js';
 import { initAssistantInput, renderAssistantInput } from '../components/assistant-input.js';
 import { initContextualCard, renderContextualCard } from '../components/contextual-card.js';
@@ -126,7 +126,11 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
   const setMapFocus = (nodeId, { announce = false } = {}) => {
     const node = getMapNode(nodeId) || getMapNode(SYLON_MAP.rootId);
     home.dataset.focusedNode = node.id;
-    nodes.forEach((button) => button.classList.toggle('is-neighbor', button.dataset.mapNode === node.id));
+    const relatedIds = new Set(getMapNeighbors(node.id).map((related) => related.id));
+    nodes.forEach((button) => {
+      button.classList.toggle('is-neighbor', button.dataset.mapNode === node.id);
+      button.classList.toggle('is-adjacent', relatedIds.has(button.dataset.mapNode));
+    });
     home.querySelectorAll('[data-map-edge]').forEach((edge) => {
       edge.classList.toggle('is-related', [edge.dataset.source, edge.dataset.target].includes(node.id));
     });
@@ -193,20 +197,17 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
       return;
     }
     const focusShell = home.querySelector('[data-focus-shell]');
-    const bounds = selectedNode.getBoundingClientRect();
-    focusShell?.style.setProperty('--focus-left', `${bounds.left}px`);
-    focusShell?.style.setProperty('--focus-top', `${bounds.top}px`);
-    focusShell?.style.setProperty('--focus-width', `${bounds.width}px`);
-    focusShell?.style.setProperty('--focus-height', `${bounds.height}px`);
     const title = focusShell?.querySelector('[data-focus-title]');
     if (title) title.textContent = node.label;
     selectedNode.classList.add('is-selected');
     home.classList.add('is-opening');
+    home.dataset.openingNode = node.id;
+    if (focusShell) focusShell.dataset.focusNode = node.id;
     focusShell?.classList.add('is-preparing');
     focusShell?.getBoundingClientRect();
     window.requestAnimationFrame(() => focusShell?.classList.add('is-active'));
     window.clearTimeout(navigationTimer);
-    navigationTimer = window.setTimeout(() => navigate(route), 560);
+    navigationTimer = window.setTimeout(() => navigate(route), 760);
   };
 
   const onNodeClick = (event) => openRoute(event.currentTarget.dataset.mapRoute);
@@ -216,11 +217,14 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
     home.querySelectorAll('[data-map-edge]').forEach((edge) => {
       edge.classList.toggle('is-related', [edge.dataset.source, edge.dataset.target].includes(nodeId));
     });
+    const adjacentIds = new Set(getMapNeighbors(nodeId).map((node) => node.id));
+    nodes.forEach((node) => node.classList.toggle('is-adjacent', adjacentIds.has(node.dataset.mapNode)));
     mapContainer?.dispatchEvent(new CustomEvent('sylon:map-hover', { detail: { nodeId } }));
   };
   const onNodeLeave = () => {
     delete home.dataset.hoveredNode;
     home.querySelectorAll('[data-map-edge]').forEach((edge) => edge.classList.remove('is-related'));
+    nodes.forEach((node) => node.classList.remove('is-adjacent'));
     mapContainer?.dispatchEvent(new CustomEvent('sylon:map-hover', { detail: { nodeId: null } }));
   };
   const onNodeFocus = (event) => {
