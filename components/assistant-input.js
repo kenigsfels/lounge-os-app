@@ -1,5 +1,5 @@
 import { executeSylonCommand } from '../core/command-router.js';
-import { askSylonLocally } from '../core/sylon-assistant.js';
+import { askSylon, isSylonAgentConfigured } from '../core/sylon-agent-client.js';
 import { getSylonMode, setSylonMode } from '../core/sylon-state.js';
 
 export function renderAssistantInput() {
@@ -47,11 +47,14 @@ export function initAssistantInput(root, { navigate, showToast }) {
   };
 
   const showThinking = () => {
+    const remoteAgent = isSylonAgentConfigured();
     wrap?.classList.add('has-answer', 'is-thinking');
     answer?.setAttribute('aria-hidden', 'false');
-    if (answerEyebrow) answerEyebrow.textContent = 'Смотрю на связи';
+    if (answerEyebrow) answerEyebrow.textContent = remoteAgent ? 'Мозг SYLON' : 'Смотрю на связи';
     if (answerText) answerText.textContent = 'Собираю ответ…';
-    if (answerDetail) answerDetail.textContent = 'Только по данным внутри SYLON.';
+    if (answerDetail) answerDetail.textContent = remoteAgent
+      ? 'Безопасно сверяю разрешённый контекст и функции.'
+      : 'Только по локальным данным внутри SYLON.';
     if (answerAction) answerAction.hidden = true;
   };
 
@@ -79,14 +82,14 @@ export function initAssistantInput(root, { navigate, showToast }) {
     showThinking();
     setSylonMode('analysis', {
       label: 'SYLON смотрит',
-      eyebrow: 'Локальный анализ',
-      message: 'Собираю ответ по данным внутри системы.',
-      detail: 'Никаких внешних запросов.',
+      eyebrow: isSylonAgentConfigured() ? 'Контекстный анализ' : 'Локальный анализ',
+      message: 'Собираю ответ по разрешённым данным внутри системы.',
+      detail: isSylonAgentConfigured() ? 'Инструменты работают только на чтение.' : 'Работаю без внешнего сервера.',
       linkedRoute: null
     });
 
     try {
-      const result = await askSylonLocally(value);
+      const result = await askSylon(value);
       const remainingDelay = Math.max(0, 420 - (performance.now() - startedAt));
       if (remainingDelay > 0) await new Promise((resolve) => window.setTimeout(resolve, remainingDelay));
       if (disposed || currentRequest !== requestId) return;
