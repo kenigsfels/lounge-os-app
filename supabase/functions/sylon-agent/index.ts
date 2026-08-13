@@ -21,10 +21,23 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json; charset=utf-8' } });
 }
 
+function hasAuthenticatedUser(request: Request) {
+  try {
+    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') || '';
+    const payloadPart = token.split('.')[1];
+    if (!payloadPart) return false;
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payloadPart.length / 4) * 4, '=');
+    const claims = JSON.parse(atob(normalized));
+    return claims?.role === 'authenticated' && typeof claims?.sub === 'string' && claims.sub.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-  if (!request.headers.get('authorization')) return json({ error: 'Authentication required' }, 401);
+  if (!hasAuthenticatedUser(request)) return json({ error: 'Authenticated SYLON user required' }, 401);
 
   const apiKey = Deno.env.get('NVIDIA_API_KEY') || '';
   const model = Deno.env.get('NVIDIA_MODEL') || '';
