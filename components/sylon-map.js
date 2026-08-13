@@ -79,7 +79,7 @@ export async function initSylonMap(container, map = SYLON_MAP) {
   visibleNodes.forEach((node, index) => {
     const isRoot = node.id === map.rootId;
     const geometry = isRoot
-      ? new THREE.DodecahedronGeometry(0.22, 1)
+      ? new THREE.DodecahedronGeometry(0.18, 1)
       : new THREE.OctahedronGeometry(0.075, 1);
     const materialOptions = {
       color: isRoot ? 0xd5c08e : node.tone === 'amber' ? 0xa88d5a : 0x789283,
@@ -88,14 +88,14 @@ export async function initSylonMap(container, map = SYLON_MAP) {
       roughness: isRoot ? 0.18 : 0.34,
       metalness: 0.02,
       transparent: true,
-      opacity: isRoot ? 0.96 : 0.82
+      opacity: isRoot ? 0.68 : 0.76
     };
     const material = isRoot
       ? new THREE.MeshPhysicalMaterial({ ...materialOptions, transmission: 0.22, thickness: 0.45, clearcoat: 0.65, clearcoatRoughness: 0.2 })
       : new THREE.MeshStandardMaterial(materialOptions);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.copy(pointById.get(node.id));
-    mesh.userData = { id: node.id, phase: index * 1.37, baseScale: isRoot ? 1.35 : 1 };
+    mesh.userData = { id: node.id, phase: index * 1.37, baseScale: isRoot ? 1.08 : 0.92 };
     mesh.scale.setScalar(mesh.userData.baseScale);
     graph.add(mesh);
     nodeMeshes.set(node.id, mesh);

@@ -122,6 +122,8 @@ test('узел раскрывается в рабочую оболочку, а D
   assert.match(homeSource, /getBoundingClientRect/);
   assert.match(homeSource, /dataset\.focusNode/);
   assert.match(homeSource, /dataset\.openingNode/);
+  assert.match(homeSource, /--portal-x/);
+  assert.match(homeSource, /getBoundingClientRect/);
   assert.match(appSource, /is-workspace-route/);
   assert.match(workspaceStyles, /\.sylon-focus-shell\.is-active/);
   assert.match(workspaceStyles, /clip-path:circle/);

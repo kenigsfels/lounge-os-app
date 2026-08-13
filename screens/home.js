@@ -133,7 +133,8 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
       button.classList.toggle('is-adjacent', relatedIds.has(button.dataset.mapNode));
     });
     home.querySelectorAll('[data-map-edge]').forEach((edge) => {
-      edge.classList.toggle('is-related', [edge.dataset.source, edge.dataset.target].includes(node.id));
+      edge.classList.toggle('is-related', node.id !== SYLON_MAP.rootId
+        && [edge.dataset.source, edge.dataset.target].includes(node.id));
     });
     mapContainer?.dispatchEvent(new CustomEvent('sylon:map-focus', { detail: { nodeId: node.id } }));
     if (pathCurrent) pathCurrent.textContent = node.id === SYLON_MAP.rootId ? 'Главная карта' : node.label;
@@ -200,6 +201,14 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
     const focusShell = home.querySelector('[data-focus-shell]');
     const title = focusShell?.querySelector('[data-focus-title]');
     if (title) title.textContent = node.label;
+    const nodeObject = selectedNode.querySelector('.sylon-map-node__object');
+    const nodeBounds = nodeObject?.getBoundingClientRect();
+    if (focusShell && nodeBounds) {
+      const portalX = ((nodeBounds.left + nodeBounds.width / 2) / window.innerWidth) * 100;
+      const portalY = ((nodeBounds.top + nodeBounds.height / 2) / window.innerHeight) * 100;
+      focusShell.style.setProperty('--portal-x', `${portalX.toFixed(2)}%`);
+      focusShell.style.setProperty('--portal-y', `${portalY.toFixed(2)}%`);
+    }
     selectedNode.classList.add('is-selected');
     home.classList.add('is-opening');
     home.dataset.openingNode = node.id;

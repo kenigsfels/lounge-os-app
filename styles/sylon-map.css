@@ -1,11 +1,11 @@
 .sylon-home--map {
-  --map-line: rgba(132, 162, 142, 0.22);
+  --map-line: rgba(139, 174, 151, 0.28);
   --map-line-active: rgba(216, 190, 128, 0.72);
   background:
-    radial-gradient(ellipse at 64% 48%, rgba(47, 78, 61, 0.24), transparent 35%),
-    radial-gradient(circle at 82% 20%, rgba(153, 116, 61, 0.1), transparent 28%),
-    radial-gradient(circle at 37% 82%, rgba(62, 90, 72, 0.09), transparent 32%),
-    linear-gradient(135deg, #080b09 0%, #0c120e 48%, #070908 100%);
+    radial-gradient(ellipse at 63% 48%, rgba(54, 91, 68, 0.34), transparent 36%),
+    radial-gradient(circle at 78% 23%, rgba(153, 116, 61, 0.14), transparent 26%),
+    radial-gradient(circle at 36% 82%, rgba(62, 102, 78, 0.13), transparent 31%),
+    linear-gradient(132deg, #070a08 0%, #0c130f 48%, #080b09 100%);
 }
 
 .sylon-home--map::before {
@@ -71,12 +71,20 @@
 .sylon-map-stage {
   position: absolute;
   z-index: 2;
-  left: 64%;
+  left: 63%;
   top: 49%;
-  width: min(1000px, 76vw);
+  width: min(1020px, 72vw);
   height: min(820px, 89vh);
   transform: translate(-50%, -50%);
   perspective: 1300px;
+}
+
+.sylon-map-stage {
+  isolation: isolate;
+}
+
+.sylon-map-stage > * {
+  transition: opacity .6s ease, filter .6s ease, transform .75s cubic-bezier(.2,.8,.2,1);
 }
 
 .sylon-map-stage::before,
@@ -123,8 +131,8 @@
   width: 54%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(83, 125, 96, 0.105), rgba(52, 75, 61, 0.025) 42%, transparent 68%);
-  box-shadow: 0 0 120px rgba(77, 110, 87, 0.08);
+  background: radial-gradient(circle, rgba(101, 145, 112, 0.16), rgba(52, 75, 61, 0.04) 44%, transparent 70%);
+  box-shadow: 0 0 150px rgba(77, 120, 91, 0.13);
   transform: translate(-50%, -50%);
   animation: sylon-map-breathe 8s ease-in-out infinite;
 }
@@ -179,7 +187,7 @@
 .sylon-map-edge--base {
   stroke: var(--map-line);
   stroke-width: 0.72;
-  opacity: 0.42;
+  opacity: 0.5;
 }
 
 .sylon-map-edge--halo {
@@ -217,6 +225,15 @@
 
 .sylon-map-nodes { z-index: 4; pointer-events: none; }
 
+.sylon-map-edge-group:not([data-source="sylon"]) .sylon-map-edge--base {
+  stroke-dasharray: 1 4.5;
+  opacity: 0.018;
+}
+
+.sylon-map-edge-group[data-source="sylon"] .sylon-map-edge--halo {
+  opacity: .16;
+}
+
 .sylon-map-node {
   --node-accent: 112, 143, 124;
   position: absolute;
@@ -244,6 +261,22 @@
 .sylon-map-node[data-map-node="schedule"] { left: 77%; top: 25%; --node-index: 2; }
 .sylon-map-node[data-map-node="tasks"] { left: 23%; top: 74%; --node-index: 3; }
 .sylon-map-node[data-map-node="warehouse"] { left: 79%; top: 70%; --node-index: 4; }
+
+.sylon-map-node[data-map-node="schedule"],
+.sylon-map-node[data-map-node="warehouse"] {
+  grid-template-columns: minmax(118px, auto) 88px;
+  transform: translate(calc(-100% + 44px), -44px);
+}
+
+.sylon-map-node[data-map-node="schedule"] .sylon-map-node__object,
+.sylon-map-node[data-map-node="warehouse"] .sylon-map-node__object { grid-column: 2; }
+
+.sylon-map-node[data-map-node="schedule"] .sylon-map-node__copy,
+.sylon-map-node[data-map-node="warehouse"] .sylon-map-node__copy {
+  grid-column: 1;
+  grid-row: 1;
+  text-align: right;
+}
 .sylon-map-node--amber { --node-accent: 174, 143, 84; }
 .sylon-map-node--stone { --node-accent: 148, 151, 142; }
 
@@ -310,7 +343,7 @@
   padding: 13px 15px;
   border: 1px solid rgba(218, 223, 214, 0.055);
   border-radius: 15px;
-  background: linear-gradient(135deg, rgba(27, 34, 29, 0.46), rgba(12, 16, 14, 0.22));
+  background: linear-gradient(135deg, rgba(31, 40, 34, 0.62), rgba(12, 17, 14, 0.34));
   box-shadow: inset 0 1px rgba(255, 255, 255, 0.025), 0 16px 40px rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -327,10 +360,17 @@
   transition: color .35s ease, transform .45s cubic-bezier(.2,.8,.2,1);
 }
 
+.sylon-map-node[data-map-node="schedule"] .sylon-map-node__copy::after,
+.sylon-map-node[data-map-node="warehouse"] .sylon-map-node__copy::after {
+  left: 11px;
+  right: auto;
+  content: "↖";
+}
+
 .sylon-map-node__copy small,
-.sylon-map-node__copy em { display: block; color: rgba(228, 230, 223, 0.34); font-size: 0.48rem; font-style: normal; letter-spacing: 0.13em; text-transform: uppercase; }
+.sylon-map-node__copy em { display: block; color: rgba(228, 230, 223, 0.46); font-size: 0.48rem; font-style: normal; letter-spacing: 0.13em; text-transform: uppercase; }
 .sylon-map-node__copy strong { display: block; margin: 8px 0 5px; font-size: 0.82rem; font-weight: 570; letter-spacing: 0.005em; }
-.sylon-map-node__copy em { color: rgba(228, 230, 223, 0.42); font-size: 0.52rem; letter-spacing: 0.02em; text-transform: none; }
+.sylon-map-node__copy em { color: rgba(228, 230, 223, 0.58); font-size: 0.52rem; letter-spacing: 0.02em; text-transform: none; }
 
 .sylon-map-node:hover .sylon-map-node__object,
 .sylon-map-node:focus-visible .sylon-map-node__object,
@@ -433,6 +473,9 @@
 .sylon-home--map.is-opening .sylon-assistant-wrap,
 .sylon-home--map.is-opening .sylon-map-hint { opacity: 0.045; }
 .sylon-home--map.is-opening .sylon-map-node.is-selected { z-index: 10; opacity: 1; filter: none; transform: translate(-44px,-44px) scale(1.48); }
+.sylon-home--map.is-opening .sylon-map-node:is([data-map-node="schedule"],[data-map-node="warehouse"]).is-selected {
+  transform: translate(calc(-100% + 44px), -44px) scale(1.34);
+}
 .sylon-home--map.is-opening .sylon-map-layer { opacity: .2; transform: scale(1.16); }
 .sylon-home--map.is-opening .sylon-map-depth { transform: scale(1.08); opacity: .32; }
 .sylon-home--map.is-opening .sylon-map-edge--signal { animation-duration: 1.5s; }
@@ -449,13 +492,29 @@
 @keyframes sylon-node-light { 0%,100%{filter:brightness(.88);opacity:.72} 46%,58%{filter:brightness(1.28);opacity:1} }
 @keyframes sylon-root-breathe { 0%,100%{transform:scale(.985);filter:brightness(.92)} 48%,58%{transform:scale(1.025);filter:brightness(1.08)} }
 
+@keyframes sylon-map-arrive {
+  from { opacity: 0; filter: blur(8px); transform: translate3d(0,12px,0) scale(.97); }
+  to { opacity: 1; filter: none; }
+}
+
+.sylon-map-node {
+  animation-name: sylon-map-arrive, sylon-map-drift;
+  animation-duration: .8s, 13s;
+  animation-delay: calc(var(--node-index) * .07s), calc(var(--node-index) * -2.1s);
+  animation-timing-function: cubic-bezier(.2,.8,.2,1), ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: both, none;
+}
+
 @media (max-width: 1180px) {
-  .sylon-map-stage { left: 65%; width: 78vw; }
-  .sylon-map-path,.sylon-map-hint { left: 65%; }
+  .sylon-map-stage { left: 64%; width: 70vw; }
+  .sylon-map-path,.sylon-map-hint { left: 64%; }
   .sylon-map-node { grid-template-columns: 72px minmax(100px,auto); min-width:190px; transform:translate(-36px,-36px); }
   .sylon-map-node__object { width:72px;height:72px; }
   .sylon-map-node--root { grid-template-columns:128px auto; transform:translate(-64px,-64px); }
   .sylon-map-node--root .sylon-map-node__object { width:128px;height:128px; }
+  .sylon-map-node[data-map-node="schedule"],
+  .sylon-map-node[data-map-node="warehouse"] { grid-template-columns:minmax(100px,auto) 72px;transform:translate(calc(-100% + 36px),-36px); }
 }
 
 @media (max-width: 860px) {
@@ -471,6 +530,12 @@
   .sylon-map-node[data-map-node="schedule"] { left:70%;top:24%; }
   .sylon-map-node[data-map-node="tasks"] { left:17%;top:73%; }
   .sylon-map-node[data-map-node="warehouse"] { left:70%;top:71%; }
+  .sylon-map-node[data-map-node="schedule"],
+  .sylon-map-node[data-map-node="warehouse"] { grid-template-columns:58px auto;transform:translate(-29px,-29px); }
+  .sylon-map-node[data-map-node="schedule"] .sylon-map-node__object,
+  .sylon-map-node[data-map-node="warehouse"] .sylon-map-node__object { grid-column:1; }
+  .sylon-map-node[data-map-node="schedule"] .sylon-map-node__copy,
+  .sylon-map-node[data-map-node="warehouse"] .sylon-map-node__copy { grid-column:2;text-align:left; }
   .sylon-map-hint { left:50%;bottom:98px; }
 }
 
@@ -510,4 +575,5 @@
   .sylon-map-node__object i { animation:none!important; }
   .sylon-map-edge,.sylon-map-node,.sylon-map-node__object,.sylon-map-node__copy,.sylon-map-layer { transition:none!important; }
   .sylon-home--map.is-opening .sylon-map-node.is-selected { transform:translate(-44px,-44px); }
+  .sylon-home--map.is-opening .sylon-map-node:is([data-map-node="schedule"],[data-map-node="warehouse"]).is-selected { transform:translate(-44px,-44px); }
 }
