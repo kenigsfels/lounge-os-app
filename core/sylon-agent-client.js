@@ -40,7 +40,7 @@ export async function buildSylonAgentContext() {
 export async function askSylonRemotely(query, { fetchImpl = fetch, signal } = {}) {
   if (!isSylonAgentConfigured()) return null;
   const session = await getCloudSession();
-  if (!session?.access_token) return null;
+  if (!session?.access_token) return { type: 'auth-required' };
   const context = await buildSylonAgentContext();
   const controller = signal ? null : new AbortController();
   const timeout = controller ? window.setTimeout(() => controller.abort(), 30000) : 0;
@@ -59,11 +59,22 @@ export async function askSylonRemotely(query, { fetchImpl = fetch, signal } = {}
 }
 
 export async function askSylon(query, options = {}) {
+  let remoteState = null;
   try {
-    const remote = await askSylonRemotely(query, options);
-    if (remote) return remote;
+    remoteState = await askSylonRemotely(query, options);
+    if (remoteState?.type === 'answer') return remoteState;
   } catch {
     // The deterministic local assistant keeps SYLON useful offline and during provider outages.
   }
-  return askSylonLocally(query, options);
+  const local = await askSylonLocally(query, options);
+  if (local) return local;
+  if (remoteState?.type === 'auth-required') {
+    return {
+      type: 'answer', intent: 'agent-auth-required', eyebrow: 'Мозг SYLON ждёт подключения',
+      text: 'Войди в Supabase Cloud, чтобы я мог обратиться к подключённой модели.',
+      detail: 'Локальные команды продолжат работать без входа.', mode: 'attention',
+      route: 'settings', actionLabel: 'Открыть настройки'
+    };
+  }
+  return null;
 }

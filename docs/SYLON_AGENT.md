@@ -12,6 +12,7 @@ SYLON Agent is a server-side, provider-neutral orchestration layer. The browser 
 - Answers return human-readable evidence badges instead of exposing internal tool names.
 - The agent runs at most four model steps and three calls per step.
 - If the server, account, or model is unavailable, the existing deterministic local assistant remains active.
+- When a model-only question requires authentication, the assistant keeps the answer card open and links directly to Supabase settings.
 
 ## Deploy
 
