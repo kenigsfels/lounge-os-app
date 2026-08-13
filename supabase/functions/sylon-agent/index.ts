@@ -8,6 +8,15 @@ const cors = {
   'access-control-allow-methods': 'POST, OPTIONS'
 };
 
+const evidenceMeta: Record<string, { label: string; route: string }> = {
+  get_schedule_window: { label: 'График', route: 'schedule' },
+  get_team_workload: { label: 'Нагрузка команды', route: 'schedule' },
+  find_shift_replacements: { label: 'Кандидаты на замену', route: 'schedule' },
+  get_open_tasks: { label: 'Задачи', route: 'tasks' },
+  get_stock_attention: { label: 'Склад', route: 'warehouse' },
+  search_knowledge: { label: 'База знаний', route: 'knowledge' }
+};
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...cors, 'content-type': 'application/json; charset=utf-8' } });
 }
@@ -23,7 +32,9 @@ Deno.serve(async (request) => {
   if (!apiKey || !model) return json({ error: 'SYLON brain is not configured' }, 503);
 
   try {
-    const raw = await request.json();
+    const rawText = await request.text();
+    if (rawText.length > 512_000) return json({ error: 'Context is too large' }, 413);
+    const raw = JSON.parse(rawText);
     const query = String(raw?.query || '').trim().slice(0, 2000);
     if (!query) return json({ error: 'Query is required' }, 400);
     const context = sanitizeAgentContext(raw?.context);
@@ -32,10 +43,11 @@ Deno.serve(async (request) => {
     try {
       const provider = createOpenAICompatibleProvider({ id: 'nvidia', apiKey, baseUrl, model });
       const result = await runSylonAgent({ provider, query, context, today: new Date().toISOString().slice(0, 10), signal: controller.signal });
+      const evidence = [...new Set(result.toolsUsed)].map((tool) => ({ tool, ...evidenceMeta[tool] })).filter((item) => item.label);
       return json({ type: 'answer', eyebrow: 'SYLON · NVIDIA', text: result.text,
-        detail: result.toolsUsed.length ? `Проверено через: ${[...new Set(result.toolsUsed)].join(', ')}` : 'Ответ модели без обращения к данным.',
-        mode: 'calm', route: result.toolsUsed.length ? 'schedule' : null,
-        actionLabel: result.toolsUsed.length ? 'Открыть график' : '', provider: provider.id, model: provider.model });
+        detail: evidence.length ? 'Ответ собран по актуальным данным SYLON.' : 'Ответ модели без обращения к данным.',
+        evidence, mode: 'calm', route: evidence[0]?.route || null,
+        actionLabel: evidence[0] ? `Открыть · ${evidence[0].label}` : '', provider: provider.id, model: provider.model });
     } finally { clearTimeout(timeout); }
   } catch (error) {
     console.error('sylon-agent failed', error instanceof Error ? error.message : 'unknown error');

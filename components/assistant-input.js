@@ -11,6 +11,7 @@ export function renderAssistantInput() {
           <small data-sylon-answer-eyebrow>SYLON</small>
           <strong data-sylon-answer-text></strong>
           <p data-sylon-answer-detail></p>
+          <div class="sylon-answer__evidence" data-sylon-answer-evidence hidden></div>
         </div>
         <button class="sylon-answer__action" type="button" data-sylon-answer-action hidden></button>
         <button class="sylon-answer__close" type="button" data-sylon-answer-close aria-label="Закрыть ответ">×</button>
@@ -34,6 +35,7 @@ export function initAssistantInput(root, { navigate, showToast }) {
   const answerEyebrow = answer?.querySelector('[data-sylon-answer-eyebrow]');
   const answerText = answer?.querySelector('[data-sylon-answer-text]');
   const answerDetail = answer?.querySelector('[data-sylon-answer-detail]');
+  const answerEvidence = answer?.querySelector('[data-sylon-answer-evidence]');
   const answerAction = answer?.querySelector('[data-sylon-answer-action]');
   const answerClose = answer?.querySelector('[data-sylon-answer-close]');
   let answerRoute = null;
@@ -55,6 +57,7 @@ export function initAssistantInput(root, { navigate, showToast }) {
     if (answerDetail) answerDetail.textContent = remoteAgent
       ? 'Безопасно сверяю разрешённый контекст и функции.'
       : 'Только по локальным данным внутри SYLON.';
+    if (answerEvidence) { answerEvidence.hidden = true; answerEvidence.replaceChildren(); }
     if (answerAction) answerAction.hidden = true;
   };
 
@@ -65,6 +68,15 @@ export function initAssistantInput(root, { navigate, showToast }) {
     if (answerEyebrow) answerEyebrow.textContent = result.eyebrow || 'SYLON';
     if (answerText) answerText.textContent = result.text;
     if (answerDetail) answerDetail.textContent = result.detail || '';
+    if (answerEvidence) {
+      const evidence = Array.isArray(result.evidence) ? result.evidence.slice(0, 4) : [];
+      answerEvidence.replaceChildren(...evidence.map((item) => {
+        const badge = document.createElement('span');
+        badge.textContent = item.label || 'Данные SYLON';
+        return badge;
+      }));
+      answerEvidence.hidden = evidence.length === 0;
+    }
     answerRoute = result.route || null;
     if (answerAction) {
       answerAction.textContent = result.actionLabel || '';

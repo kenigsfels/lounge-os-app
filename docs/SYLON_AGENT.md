@@ -7,7 +7,9 @@ SYLON Agent is a server-side, provider-neutral orchestration layer. The browser 
 - NVIDIA is the first OpenAI-compatible provider.
 - The API key exists only in Edge Function secrets.
 - A signed-in Supabase session is required.
-- Tools are read-only: schedule window, team workload, and replacement suggestions.
+- Tools are read-only: schedule window, team workload, replacement suggestions, open tasks, low stock, and knowledge search.
+- The active SPA route is included so the model can answer in the current workspace context.
+- Answers return human-readable evidence badges instead of exposing internal tool names.
 - The agent runs at most four model steps and three calls per step.
 - If the server, account, or model is unavailable, the existing deterministic local assistant remains active.
 

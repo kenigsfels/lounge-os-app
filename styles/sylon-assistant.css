@@ -92,6 +92,25 @@
   line-height: 1.5;
 }
 
+.sylon-answer__evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+
+.sylon-answer__evidence[hidden] { display: none; }
+
+.sylon-answer__evidence span {
+  padding: 4px 7px;
+  border: 1px solid rgba(142, 169, 149, .14);
+  border-radius: 999px;
+  background: rgba(87, 119, 96, .09);
+  color: rgba(202, 216, 204, .56);
+  font-size: .48rem;
+  letter-spacing: .045em;
+}
+
 .sylon-answer__action {
   align-self: center;
   min-width: max-content;

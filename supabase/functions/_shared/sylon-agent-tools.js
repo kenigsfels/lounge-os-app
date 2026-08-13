@@ -92,6 +92,37 @@ export const SYLON_AGENT_TOOLS = Object.freeze([
         absent_employee: { type: 'string', description: 'Имя отсутствующего сотрудника' }
       }, required: ['date', 'absent_employee'] }
     }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_open_tasks',
+      description: 'Показать открытые, срочные или просроченные задачи SYLON.',
+      parameters: { type: 'object', additionalProperties: false, properties: {
+        due_before: { type: 'string', description: 'Необязательная верхняя дата срока YYYY-MM-DD' },
+        assignee: { type: 'string', description: 'Необязательное имя ответственного' }
+      } }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_stock_attention',
+      description: 'Показать позиции склада с пустым или низким остатком.',
+      parameters: { type: 'object', additionalProperties: false, properties: {
+        category: { type: 'string', description: 'Необязательная категория склада' }
+      } }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'search_knowledge',
+      description: 'Найти подходящий внутренний регламент или инструкцию в базе знаний SYLON.',
+      parameters: { type: 'object', additionalProperties: false, properties: {
+        query: { type: 'string', description: 'Что нужно найти' }
+      }, required: ['query'] }
+    }
   }
 ]);
 
@@ -108,7 +139,22 @@ export function sanitizeAgentContext(value) {
       administrators: (Array.isArray(day?.administrators) ? day.administrators : []).slice(0, 20).map((item) => ({ name: clean(item?.name), shift: clean(item?.shift, 16) }))
     })).filter((day) => day.date)
   })).filter((week) => week.days.length);
-  return { employees, schedule: { weeks } };
+  const tasks = (Array.isArray(value?.tasks) ? value.tasks : []).slice(0, 200).map((task) => ({
+    id: clean(task?.id, 80), title: clean(task?.title, 200), lane: clean(task?.lane, 20),
+    assigneeId: clean(task?.assigneeId, 80), dueDate: dateKey(task?.dueDate), dueTime: clean(task?.dueTime, 5),
+    shiftDate: dateKey(task?.shiftDate), status: task?.status === 'completed' ? 'completed' : 'open'
+  })).filter((task) => task.id && task.title);
+  const warehouse = (Array.isArray(value?.warehouse) ? value.warehouse : []).slice(0, 300).map((item) => ({
+    id: clean(item?.id, 80), name: clean(item?.name), category: clean(item?.category, 40), unit: clean(item?.unit, 20),
+    quantity: Math.max(0, Number(item?.quantity) || 0), minimum: Math.max(0, Number(item?.minimum) || 0)
+  })).filter((item) => item.id && item.name);
+  const knowledge = (Array.isArray(value?.knowledge) ? value.knowledge : []).slice(0, 120).map((item) => ({
+    id: clean(item?.id, 80), title: clean(item?.title, 200), situation: clean(item?.situation, 240),
+    category: clean(item?.category, 40), summary: clean(item?.summary, 600),
+    steps: (Array.isArray(item?.steps) ? item.steps : []).slice(0, 12).map((step) => clean(step, 400)),
+    warnings: (Array.isArray(item?.warnings) ? item.warnings : []).slice(0, 8).map((warning) => clean(warning, 400))
+  })).filter((item) => item.id && item.title);
+  return { currentRoute: clean(value?.currentRoute, 40), employees, schedule: { weeks }, tasks, warehouse, knowledge };
 }
 
 export function executeSylonTool(name, args, context) {
@@ -140,6 +186,42 @@ export function executeSylonTool(name, args, context) {
       })
       .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ru')).slice(0, 5);
     return { date, absentEmployee: missing?.name || absent, role: missing?.role || 'unknown', shift: missing?.shift || '', candidates };
+  }
+
+  if (name === 'get_open_tasks') {
+    const dueBefore = dateKey(args?.due_before);
+    const assigneeQuery = clean(args?.assignee).toLocaleLowerCase('ru-RU');
+    const employeeIds = new Set((context?.employees || []).filter((employee) => !assigneeQuery
+      || employee.name.toLocaleLowerCase('ru-RU').includes(assigneeQuery)).map((employee) => employee.id));
+    const tasks = (context?.tasks || []).filter((task) => task.status === 'open')
+      .filter((task) => !dueBefore || (task.dueDate && task.dueDate <= dueBefore))
+      .filter((task) => !assigneeQuery || employeeIds.has(task.assigneeId))
+      .map((task) => ({ ...task, assignee: context.employees.find((employee) => employee.id === task.assigneeId)?.name || '' }))
+      .sort((a, b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999') || a.title.localeCompare(b.title, 'ru')).slice(0, 50);
+    return { tasks, count: tasks.length };
+  }
+
+  if (name === 'get_stock_attention') {
+    const category = clean(args?.category, 40);
+    const items = (context?.warehouse || []).filter((item) => !category || item.category === category)
+      .map((item) => ({ ...item, state: item.quantity <= 0 ? 'empty' : (item.minimum > 0 && item.quantity <= item.minimum ? 'low' : 'ok') }))
+      .filter((item) => item.state !== 'ok')
+      .sort((a, b) => (a.state === b.state ? a.quantity - b.quantity : a.state === 'empty' ? -1 : 1)).slice(0, 50);
+    return { items, count: items.length };
+  }
+
+  if (name === 'search_knowledge') {
+    const query = clean(args?.query, 300).toLocaleLowerCase('ru-RU');
+    const tokens = [...new Set(query.split(/[^\p{L}\p{N}]+/u).filter((token) => token.length > 2))];
+    if (!tokens.length) return { results: [], count: 0 };
+    const results = (context?.knowledge || []).map((item) => {
+      const title = `${item.title} ${item.situation}`.toLocaleLowerCase('ru-RU');
+      const body = `${item.category} ${item.summary} ${item.steps.join(' ')} ${item.warnings.join(' ')}`.toLocaleLowerCase('ru-RU');
+      const score = tokens.reduce((total, token) => total + (title.includes(token) ? 5 : 0) + (body.includes(token) ? 1 : 0), 0);
+      return { score, id: item.id, title: item.title, situation: item.situation, summary: item.summary,
+        steps: item.steps, warnings: item.warnings };
+    }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score || a.title.localeCompare(b.title, 'ru')).slice(0, 5);
+    return { results, count: results.length };
   }
 
   return { error: 'Инструмент не разрешён.' };

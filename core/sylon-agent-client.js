@@ -1,7 +1,10 @@
 import { getEmployees } from './employees.js';
+import { getRegulations } from './knowledge.js';
 import { readScheduleSnapshot } from './schedule.js';
 import { askSylonLocally } from './sylon-assistant.js';
 import { getCloudSession } from './supabase.js';
+import { getTasks } from './tasks.js';
+import { getWarehouseItems } from './warehouse.js';
 
 const env = import.meta.env || {};
 const agentEnabled = env.VITE_SYLON_AGENT_ENABLED === 'true' || Boolean(env.VITE_SYLON_AGENT_URL?.trim());
@@ -25,8 +28,12 @@ export function isSylonAgentConfigured() {
 export async function buildSylonAgentContext() {
   const schedule = await readScheduleSnapshot();
   return {
+    currentRoute: String(globalThis.location?.hash || '#dashboard').replace(/^#/, ''),
     employees: getEmployees().slice(0, 120).map(employeeSnapshot),
-    schedule: { weeks: schedule.weeks.slice(0, 10) }
+    schedule: { weeks: schedule.weeks.slice(0, 10) },
+    tasks: getTasks().slice(0, 200),
+    warehouse: getWarehouseItems().slice(0, 300),
+    knowledge: getRegulations().slice(0, 120)
   };
 }
 
