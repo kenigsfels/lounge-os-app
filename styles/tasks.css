@@ -120,6 +120,10 @@
 .task-history__list article small { display: block; margin-top: 3px; color: var(--text-secondary); font-size: .52rem; }
 .task-history__list article button { padding: 6px 9px; border: 1px solid rgba(217, 222, 212, .08); border-radius: 8px; background: transparent; color: var(--text-secondary); font: inherit; font-size: .55rem; cursor: pointer; }
 
+.task-lane.is-map-arrival,.task-history.is-map-arrival { animation:sylon-tasks-map-arrival 1.35s cubic-bezier(.2,.82,.18,1) both; }
+@keyframes sylon-tasks-map-arrival { 0%{border-color:rgba(230,193,109,.55);box-shadow:0 0 0 1px rgba(230,193,109,.12),0 0 55px rgba(209,166,77,.2);transform:translateY(10px)} 45%{border-color:rgba(214,186,119,.28);box-shadow:0 0 38px rgba(209,166,77,.1)} 100%{transform:none} }
+@media (prefers-reduced-motion: reduce) { .task-lane.is-map-arrival,.task-history.is-map-arrival { animation:none;border-color:rgba(214,186,119,.28); } }
+
 @media (max-width: 980px) { .task-streams { grid-template-columns: 1fr; } .task-lane__empty { min-height: 80px; } }
 @media (max-width: 620px) {
   .tasks-header { grid-template-columns: 1fr; gap: 12px; padding: 25px 20px 20px; }

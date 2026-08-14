@@ -8,6 +8,7 @@ import {
   saveScheduleData
 } from '../core/schedule.js';
 import { synchronizeSchedule } from '../core/cloud-sync.js';
+import { takeNavigationContext } from '../core/navigation-context.js';
 
 let rememberedScheduleView = 'today';
 
@@ -248,6 +249,9 @@ export function initScheduleScreen(root, { showToast = () => {} } = {}) {
   let activeIndex = 0;
   let cloudConnected = false;
   let disposed = false;
+  const mapContext = takeNavigationContext('schedule');
+  let contextApplied = false;
+  if (mapContext?.type === 'schedule-view' && ['today', 'week'].includes(mapContext.value)) rememberedScheduleView = mapContext.value;
 
   const updateSwitch = () => {
     screen?.querySelectorAll('[data-schedule-view]').forEach((button) => {
@@ -262,11 +266,23 @@ export function initScheduleScreen(root, { showToast = () => {} } = {}) {
     updateSwitch();
     if (!hasScheduleData(schedule)) {
       content.innerHTML = renderMissingSchedule();
+      if (!contextApplied && mapContext?.type === 'schedule-view') {
+        contextApplied = true;
+        requestAnimationFrame(() => content.querySelector('[data-schedule-view-panel]')?.classList.add('is-map-arrival'));
+      }
       return;
     }
     content.innerHTML = rememberedScheduleView === 'week'
       ? renderWeekView(schedule, activeIndex)
       : renderTodayView(schedule);
+    if (!contextApplied && mapContext?.type === 'schedule-view') {
+      contextApplied = true;
+      requestAnimationFrame(() => {
+        const target = content.querySelector(`[data-schedule-view-panel="${mapContext.value}"]`);
+        target?.classList.add('is-map-arrival');
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
   };
 
   const updateSource = () => {

@@ -27,7 +27,7 @@ assert.match(serviceWorker, /request\.mode === 'navigate'/);
 assert.match(serviceWorker, /url\.origin !== self\.location\.origin/);
 assert.match(serviceWorker, /caches\.match\('\.\/index\.html'\)/);
 assert.match(serviceWorker, /LEGACY_CACHE_PREFIX/);
-assert.match(serviceWorker, /sylon-map/);
+assert.match(serviceWorker, /personal-academy/);
 assert.match(pwaSource, /import\.meta\.env\?\.DEV/);
 assert.match(pwaSource, /getRegistrations/);
 console.log('✓ service worker сохраняет оболочку и не кэширует Supabase-запросы');

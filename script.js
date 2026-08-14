@@ -4,14 +4,15 @@ import { renderToast, createToast } from './components/toast.js';
 import { renderSylonHomeScreen, initSylonHomeScreen } from './screens/home.js';
 import { renderEmployeesScreen, initEmployeesScreen } from './screens/employees.js';
 import { renderScheduleScreen, initScheduleScreen } from './screens/schedule.js';
-import { renderSalaryScreen } from './screens/salary.js';
+import { renderSalaryScreen, initSalaryScreen } from './screens/salary.js';
 import { renderWarehouseScreen, initWarehouseScreen } from './screens/warehouse.js';
 import { renderAnalyticsScreen, initAnalyticsScreen } from './screens/analytics.js';
 import { renderKnowledgeScreen, initKnowledgeScreen } from './screens/knowledge.js';
-import { renderTrainingScreen } from './screens/training.js';
+import { renderTrainingScreen, initTrainingScreen } from './screens/training.js';
 import { renderTasksScreen, initTasksScreen } from './screens/tasks.js';
 import { renderSettingsScreen, initSettingsScreen } from './screens/settings.js';
 import { registerSylonServiceWorker } from './core/pwa.js';
+import { getCloudSession } from './core/supabase.js';
 
 const screens = {
   dashboard: renderSylonHomeScreen,
@@ -28,7 +29,19 @@ const screens = {
 
 registerSylonServiceWorker();
 
-function startApp() {
+async function startApp() {
+  // Supabase returns magic-link credentials in the URL fragment. Let the
+  // client consume and persist them before the hash router replaces it with
+  // the initial SPA route.
+  await getCloudSession().catch(() => null);
+
+  const authRoute = new URLSearchParams(window.location.search).get('sylon-auth-route');
+  if (authRoute) {
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('sylon-auth-route');
+    window.history.replaceState(null, '', `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+  }
+
   document.body.classList.toggle('is-desktop-preview', Boolean(globalThis.sylon?.desktop?.preview));
   const headerRoot = document.querySelector('#headerRoot');
   const workspace = document.querySelector('#workspace');
@@ -65,7 +78,7 @@ function startApp() {
       }
 
       if (normalizedRoute === 'settings') {
-        initSettingsScreen(workspace, { showToast });
+        cleanupScreen = initSettingsScreen(workspace, { showToast });
       }
 
       if (normalizedRoute === 'employees') {
@@ -74,6 +87,10 @@ function startApp() {
 
       if (normalizedRoute === 'schedule') {
         cleanupScreen = initScheduleScreen(workspace, { showToast });
+      }
+
+      if (normalizedRoute === 'salary') {
+        cleanupScreen = initSalaryScreen(workspace, { showToast });
       }
 
       if (normalizedRoute === 'tasks') {
@@ -92,13 +109,19 @@ function startApp() {
         cleanupScreen = initKnowledgeScreen(workspace, { showToast });
       }
 
+      if (normalizedRoute === 'training') {
+        cleanupScreen = initTrainingScreen(workspace, { showToast });
+      }
+
       currentRoute = normalizedRoute;
     };
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     document.body.classList.toggle('is-returning-home', currentRoute !== null && normalizedRoute === 'dashboard');
-    if (document.startViewTransition && !reducedMotion) document.startViewTransition(renderRoute);
-    else renderRoute();
+    if (document.startViewTransition && !reducedMotion) {
+      const transition = document.startViewTransition(renderRoute);
+      transition.finished.catch(() => {});
+    } else renderRoute();
     window.setTimeout(() => document.body.classList.remove('is-returning-home'), reducedMotion ? 0 : 540);
 
     if (updateHistory) {
@@ -127,7 +150,7 @@ function startApp() {
     navigate(window.location.hash.slice(1), { updateHistory: false });
   });
 
-  const initialRoute = window.location.hash.slice(1);
+  const initialRoute = authRoute || window.location.hash.slice(1);
   const knownRoute = dockItems.some((item) => item.route === initialRoute);
   navigate(knownRoute ? initialRoute : 'dashboard');
   const boot = document.querySelector('#appBoot');

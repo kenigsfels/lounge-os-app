@@ -4,8 +4,8 @@ export const SYLON_MODULES = Object.freeze([
   { route: 'schedule', label: 'График смен', shortLabel: 'График', tone: 'amber', active: true, position: 'right-top' },
   { route: 'tasks', label: 'Задачи', shortLabel: 'Задачи', tone: 'stone', active: true, position: 'left-bottom' },
   { route: 'warehouse', label: 'Склад', shortLabel: 'Склад', tone: 'moss', active: true, position: 'right-bottom' },
-  { route: 'salary', label: 'Финансы', shortLabel: 'Финансы', tone: 'amber', active: false },
-  { route: 'training', label: 'Обучение', shortLabel: 'Обучение', tone: 'stone', active: false },
+  { route: 'salary', label: 'Финансы', shortLabel: 'Финансы', tone: 'amber', active: true },
+  { route: 'training', label: 'Обучение', shortLabel: 'Обучение', tone: 'moss', active: true },
   { route: 'knowledge', label: 'База знаний', shortLabel: 'Знания', tone: 'stone', active: false },
   { route: 'settings', label: 'Настройки', shortLabel: 'Настройки', tone: 'stone', active: false }
 ]);

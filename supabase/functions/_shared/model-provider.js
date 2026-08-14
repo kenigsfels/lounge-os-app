@@ -1,4 +1,7 @@
-export function createOpenAICompatibleProvider({ id = 'openai-compatible', apiKey, baseUrl, model, fetchImpl = fetch }) {
+export function createOpenAICompatibleProvider({
+  id = 'openai-compatible', apiKey, baseUrl, model, fetchImpl = fetch,
+  temperature = 0.15, topP, maxTokens = 900, extraBody = {}
+}) {
   const endpoint = `${String(baseUrl || '').replace(/\/$/, '')}/chat/completions`;
   return {
     id, model,
@@ -6,7 +9,12 @@ export function createOpenAICompatibleProvider({ id = 'openai-compatible', apiKe
       const response = await fetchImpl(endpoint, {
         method: 'POST', signal,
         headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({ model, messages, tools, tool_choice: 'auto', temperature: 0.15, max_tokens: 900 })
+        body: JSON.stringify({
+          model, messages, tools, tool_choice: 'auto', temperature,
+          ...(Number.isFinite(topP) ? { top_p: topP } : {}),
+          max_tokens: maxTokens,
+          ...extraBody
+        })
       });
       if (!response.ok) throw new Error(`Model provider returned ${response.status}`);
       const payload = await response.json();

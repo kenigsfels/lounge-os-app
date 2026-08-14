@@ -12,7 +12,12 @@
 @import url('./styles/schedule-space.css');
 @import url('./styles/team-space.css');
 @import url('./styles/warehouse-space.css');
+@import url('./styles/finance-space.css');
 @import url('./styles/analytics-space.css');
 @import url('./styles/knowledge-space.css');
+@import url('./styles/academy-space.css');
+@import url('./styles/academy-layout.css');
 @import url('./styles/desktop-preview.css');
 @import url('./styles/responsive.css');
+@import url('./styles/sylon-reference-map.css');
+@import url('./styles/academy-reference.css');

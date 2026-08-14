@@ -23,6 +23,8 @@ supabase functions deploy sylon-agent
 
 Set `VITE_SYLON_AGENT_ENABLED=true` for the client build. `NVIDIA_BASE_URL` is optional and defaults to NVIDIA's hosted OpenAI-compatible API. A self-hosted NIM can be selected by changing that secret without changing the application or tool layer.
 
+The current hosted default is `nvidia/nemotron-3-super-120b-a12b`. Its NVIDIA-recommended sampling settings are configured in the Edge Function, with extended reasoning disabled to keep interactive requests inside the function timeout.
+
 ## Safety boundary
 
 The model never receives storage access or arbitrary function execution. Tool names and arguments are validated by the server. Future write tools must be placed in a separate registry and require an explicit user confirmation token before execution.

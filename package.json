@@ -1,7 +1,7 @@
 {
   "name": "sylon-os",
   "private": true,
-  "version": "0.10.0-preview.4",
+  "version": "0.10.0-preview.5",
   "description": "SYLON — управление командой и операционной работой кальянной",
   "author": "kenigsfels",
   "main": "electron/main.cjs",
@@ -12,10 +12,10 @@
     "desktop:pack": "npm run build && electron-builder --dir --win",
     "desktop:build": "npm run build && electron-builder --win nsis",
     "desktop:preview": "npm run build && electron-builder --win portable",
-    "test": "node tests/employees.test.js && node tests/backup.test.js && node tests/schedule.test.js && node tests/supabase.test.js && node tests/pwa.test.js && node tests/home.test.js && node tests/briefing.test.js && node tests/assistant.test.js && node tests/tasks.test.js && node tests/team.test.js && node tests/warehouse.test.js && node tests/analytics.test.js && node tests/knowledge.test.js",
+    "test": "node tests/employees.test.js && node tests/backup.test.js && node tests/schedule.test.js && node tests/supabase.test.js && node tests/pwa.test.js && node tests/home.test.js && node tests/briefing.test.js && node tests/assistant.test.js && node tests/tasks.test.js && node tests/team.test.js && node tests/warehouse.test.js && node tests/analytics.test.js && node tests/knowledge.test.js && node tests/academy.test.js && node tests/agent.test.js",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 8765",
-    "check": "node --check script.js && node --check screens/home.js && node --check screens/tasks.js && node --check screens/schedule.js && node --check screens/employees.js && node --check screens/warehouse.js && node --check screens/analytics.js && node --check screens/knowledge.js && node --check components/sylon-map.js && node --check components/assistant-input.js && node --check core/sylon-map-model.js && node --check core/command-router.js && node --check core/sylon-assistant.js && node --check core/tasks.js && node --check core/warehouse.js && node --check core/analytics.js && node --check core/knowledge.js"
+    "check": "node --check script.js && node --check screens/home.js && node --check screens/tasks.js && node --check screens/schedule.js && node --check screens/employees.js && node --check screens/salary.js && node --check screens/warehouse.js && node --check screens/analytics.js && node --check screens/knowledge.js && node --check screens/training.js && node --check components/sylon-map.js && node --check components/assistant-input.js && node --check core/sylon-map-model.js && node --check core/command-router.js && node --check core/sylon-assistant.js && node --check core/navigation-context.js && node --check core/tasks.js && node --check core/warehouse.js && node --check core/analytics.js && node --check core/knowledge.js && node --check core/academy.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",

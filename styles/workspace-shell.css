@@ -301,6 +301,20 @@ body.is-returning-home .workspace > .view {
   transform: scale(0.985);
 }
 
+body.is-workspace-route .is-map-arrival {
+  animation:sylon-context-arrival 1.35s cubic-bezier(.2,.82,.18,1) both;
+}
+
+@keyframes sylon-context-arrival {
+  0% { border-color:rgba(230,193,109,.58);box-shadow:0 0 0 1px rgba(230,193,109,.14),0 0 62px rgba(209,166,77,.22);filter:brightness(1.12);transform:translateY(10px) scale(.99); }
+  46% { border-color:rgba(214,186,119,.3);box-shadow:0 0 40px rgba(209,166,77,.11); }
+  100% { filter:none;transform:none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.is-workspace-route .is-map-arrival { animation:none;border-color:rgba(214,186,119,.3); }
+}
+
 /* Map portal: the selected node expands into the existing SPA workspace. */
 .sylon-focus-shell {
   --portal-x: 64%;

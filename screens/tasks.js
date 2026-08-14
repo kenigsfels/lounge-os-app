@@ -1,5 +1,6 @@
 import { getEmployees } from '../core/employees.js';
 import { createTask, deleteTask, getTaskOverview, getTasks, setTaskCompleted, updateTask } from '../core/tasks.js';
+import { takeNavigationContext } from '../core/navigation-context.js';
 
 const LANE_LABELS = { now: 'Сейчас', today: 'Сегодня', later: 'Позже' };
 
@@ -61,7 +62,7 @@ function renderTaskCard(task, employees, currentDay, expandedId) {
 
 function renderLane(key, title, subtitle, tasks, employees, overview, expandedId) {
   return `
-    <section class="task-lane task-lane--${key}" aria-labelledby="taskLane${key}">
+    <section class="task-lane task-lane--${key}" data-task-lane="${key}" aria-labelledby="taskLane${key}">
       <header><div><p>${escapeHtml(subtitle)}</p><h2 id="taskLane${key}">${escapeHtml(title)}</h2></div><span>${tasks.length}</span></header>
       <div class="task-lane__list">
         ${tasks.length > 0
@@ -87,7 +88,7 @@ function renderFocus(overview, employees) {
 
 function renderHistory(tasks, employees) {
   return `
-    <details class="task-history glass-panel">
+    <details class="task-history glass-panel" data-task-history>
       <summary><span><small>Архив действий</small><strong>Выполнено</strong></span><b>${tasks.length}</b></summary>
       <div class="task-history__list">
         ${tasks.length > 0 ? tasks.map((task) => `
@@ -140,6 +141,7 @@ export function initTasksScreen(root, { showToast = () => {} } = {}) {
   const quickForm = root.querySelector('[data-task-quick-add]');
   let expandedId = '';
   if (!screen || !content || !quickForm) return () => {};
+  const mapContext = takeNavigationContext('tasks');
 
   const refresh = () => {
     const tasks = getTasks();
@@ -226,6 +228,15 @@ export function initTasksScreen(root, { showToast = () => {} } = {}) {
   quickForm.addEventListener('submit', onQuickSubmit);
   content.addEventListener('click', onContentClick);
   content.addEventListener('submit', onContentSubmit);
+  requestAnimationFrame(() => {
+    const target = mapContext?.type === 'tasks-lane'
+      ? content.querySelector(`[data-task-lane="${mapContext.value}"]`)
+      : mapContext?.type === 'tasks-history' ? content.querySelector('[data-task-history]') : null;
+    if (!target) return;
+    if (target.matches('details')) target.open = true;
+    target.classList.add('is-map-arrival');
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
   return () => {
     quickForm.removeEventListener('submit', onQuickSubmit);
     content.removeEventListener('click', onContentClick);

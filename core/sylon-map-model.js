@@ -48,8 +48,26 @@ const nodes = [
     position: { x: 79, y: 70, z: 0.2 },
     spatial: { x: 2.55, y: -1.55, z: 0.2 }
   },
-  { id: 'training', kind: 'workspace', label: 'Обучение', route: 'training', enabled: false },
-  { id: 'finance', kind: 'workspace', label: 'Финансы', route: 'salary', enabled: false }
+  {
+    id: 'training',
+    kind: 'workspace',
+    label: 'Обучение',
+    detail: 'База и развитие',
+    route: 'training',
+    tone: 'moss',
+    position: { x: 17, y: 52, z: 0.34 },
+    spatial: { x: -3.05, y: -0.08, z: 0.34 }
+  },
+  {
+    id: 'finance',
+    kind: 'workspace',
+    label: 'Финансы',
+    detail: 'Расчёты и выплаты',
+    route: 'salary',
+    tone: 'amber',
+    position: { x: 83, y: 49, z: 0.26 },
+    spatial: { x: 3.08, y: 0.08, z: 0.26 }
+  }
 ];
 
 const edges = [
@@ -57,9 +75,13 @@ const edges = [
   { id: 'sylon-schedule', source: 'sylon', target: 'schedule', relation: 'координирует смены' },
   { id: 'sylon-tasks', source: 'sylon', target: 'tasks', relation: 'направляет действия' },
   { id: 'sylon-warehouse', source: 'sylon', target: 'warehouse', relation: 'отслеживает запасы' },
+  { id: 'sylon-training', source: 'sylon', target: 'training', relation: 'развивает знания команды' },
+  { id: 'sylon-finance', source: 'sylon', target: 'finance', relation: 'связывает смены и выплаты' },
   { id: 'employees-schedule', source: 'employees', target: 'schedule', relation: 'работает по графику' },
   { id: 'tasks-schedule', source: 'tasks', target: 'schedule', relation: 'связаны со сменами' },
-  { id: 'warehouse-tasks', source: 'warehouse', target: 'tasks', relation: 'создаёт точки внимания' }
+  { id: 'warehouse-tasks', source: 'warehouse', target: 'tasks', relation: 'создаёт точки внимания' },
+  { id: 'training-employees', source: 'training', target: 'employees', relation: 'развивает навыки людей' },
+  { id: 'finance-schedule', source: 'finance', target: 'schedule', relation: 'считает рабочее время' }
 ];
 
 export const SYLON_MAP = Object.freeze({

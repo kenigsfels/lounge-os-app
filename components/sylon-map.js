@@ -73,6 +73,7 @@ export async function initSylonMap(container, map = SYLON_MAP) {
   ]));
   const nodeMeshes = new Map();
   const edgeLines = new Map();
+  const signalDots = [];
   const hubRings = new THREE.Group();
   graph.add(hubRings);
 
@@ -132,6 +133,28 @@ export async function initSylonMap(container, map = SYLON_MAP) {
     line.userData = { source: edge.source, target: edge.target, baseOpacity: material.opacity };
     graph.add(line);
     edgeLines.set(edge.id, line);
+
+    if (edge.source === map.rootId) {
+      const signal = new THREE.Mesh(
+        new THREE.SphereGeometry(0.026, 8, 8),
+        new THREE.MeshBasicMaterial({
+          color: 0xe3bd6d,
+          transparent: true,
+          opacity: 0.82,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        })
+      );
+      signal.userData = {
+        source: source.clone(),
+        target: target.clone(),
+        phase: signalDots.length * 0.23,
+        speed: 0.082 + signalDots.length * 0.008,
+        targetId: edge.target
+      };
+      graph.add(signal);
+      signalDots.push(signal);
+    }
   });
 
   const dustCount = Math.min(profile.particles, 82);
@@ -222,8 +245,19 @@ export async function initSylonMap(container, map = SYLON_MAP) {
         || [line.userData.source, line.userData.target].includes(focusedId);
       line.material.opacity = line.userData.baseOpacity + (connected ? 0.12 : 0);
     });
+    signalDots.forEach((signal) => {
+      const progress = (elapsed * signal.userData.speed + signal.userData.phase) % 1;
+      const eased = progress * progress * (3 - 2 * progress);
+      signal.position.lerpVectors(signal.userData.source, signal.userData.target, eased);
+      signal.position.z += Math.sin(progress * Math.PI) * 0.09;
+      const active = signal.userData.targetId === hoveredId || signal.userData.targetId === focusedId;
+      const shimmer = 0.72 + Math.sin(elapsed * 4.2 + signal.userData.phase * 12) * 0.2;
+      signal.material.opacity = active ? 1 : shimmer;
+      signal.scale.setScalar(active ? 1.8 : 1 + Math.sin(progress * Math.PI) * 0.45);
+    });
     warmLight.position.x = 1.7 + Math.sin(elapsed * 0.21) * 0.28;
     warmLight.position.y = 1.5 + Math.cos(elapsed * 0.17) * 0.22;
+    warmLight.intensity = 3.05 + Math.sin(elapsed * 0.7) * 0.45;
     renderer.render(scene, camera);
   };
 

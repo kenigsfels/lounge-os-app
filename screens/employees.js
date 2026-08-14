@@ -1,6 +1,7 @@
 import { createEmployee, deleteEmployee, getEmployees, updateEmployee } from '../core/employees.js';
 import { deleteEmployeeFromCloud, saveEmployeeToCloud, synchronizeEmployees } from '../core/cloud-sync.js';
 import { normalizeScheduleData, readScheduleSnapshot } from '../core/schedule.js';
+import { takeNavigationContext } from '../core/navigation-context.js';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -144,6 +145,7 @@ export function initEmployeesScreen(root, { showToast = () => {} } = {}) {
   let selectedId = '';
   let disposed = false;
   if (!screen || !drawer || !drawerContent) return () => {};
+  const mapContext = takeNavigationContext('employees');
 
   const refresh = () => {
     const employees = getEmployees();
@@ -217,6 +219,13 @@ export function initEmployeesScreen(root, { showToast = () => {} } = {}) {
   drawer.addEventListener('submit', onDrawerSubmit);
   loadToday().catch(() => { if (!disposed && todayRoot) todayRoot.innerHTML = renderTodayRoster([]); });
   synchronizeEmployees().then((result) => { if (!disposed && result.connected) refresh(); }).catch(() => {});
+  requestAnimationFrame(() => {
+    const target = mapContext?.type === 'employees-directory'
+      ? screen.querySelector('.team-directory-space')
+      : mapContext?.type === 'employees-onboarding' ? screen.querySelector('.team-today') : null;
+    target?.classList.add('is-map-arrival');
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 
   return () => {
     disposed = true;

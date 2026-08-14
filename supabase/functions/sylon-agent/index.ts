@@ -54,7 +54,11 @@ Deno.serve(async (request) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 28000);
     try {
-      const provider = createOpenAICompatibleProvider({ id: 'nvidia', apiKey, baseUrl, model });
+      const provider = createOpenAICompatibleProvider({
+        id: 'nvidia', apiKey, baseUrl, model,
+        temperature: 1, topP: 0.95,
+        extraBody: { chat_template_kwargs: { enable_thinking: false } }
+      });
       const result = await runSylonAgent({ provider, query, context, today: new Date().toISOString().slice(0, 10), signal: controller.signal });
       const evidence = [...new Set(result.toolsUsed)].map((tool) => ({ tool, ...evidenceMeta[tool] })).filter((item) => item.label);
       return json({ type: 'answer', eyebrow: 'SYLON · NVIDIA', text: result.text,

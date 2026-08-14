@@ -34,7 +34,12 @@ export async function getCloudSession() {
 
 export function buildAuthRedirectUrl(locationHref, baseUrl) {
   const redirectUrl = new URL(baseUrl, locationHref);
-  redirectUrl.hash = 'settings';
+  // Supabase implicit auth returns credentials in the URL fragment. Keeping
+  // the SPA route there would compete with that fragment and can discard the
+  // session before the client reads it.
+  redirectUrl.hash = '';
+  redirectUrl.search = '';
+  redirectUrl.searchParams.set('sylon-auth-route', 'settings');
   return redirectUrl.toString();
 }
 
