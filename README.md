@@ -19,7 +19,8 @@
 
 ## Windows-приложение
 
-Готовый установщик создаётся в `release/SYLON-OS-Setup-0.9.0-x64.exe`:
+Готовый установщик создаётся в `release/SYLON-OS-Setup-0.10.0-preview.5-x64.exe`
+(имя версии соответствует `version` в `package.json`):
 
 ```powershell
 npm install
