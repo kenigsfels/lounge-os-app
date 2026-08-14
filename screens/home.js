@@ -383,6 +383,13 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
     initFallbackNavigation(home, navigate)
   ];
   let mapCleanup = () => {};
+  let mapIdleHandle = 0;
+  const scheduleMapInit = typeof window.requestIdleCallback === 'function'
+    ? (callback) => window.requestIdleCallback(callback, { timeout: 1200 })
+    : (callback) => window.setTimeout(callback, 1);
+  const cancelMapInit = typeof window.cancelIdleCallback === 'function'
+    ? (handle) => window.cancelIdleCallback(handle)
+    : (handle) => window.clearTimeout(handle);
   let disposed = false;
   let demoOverride = false;
   let navigationTimer = 0;
@@ -553,9 +560,12 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
     }
   });
 
-  initSylonMap(mapContainer).then((disposeMap) => {
-    if (disposed) disposeMap();
-    else mapCleanup = disposeMap;
+  mapIdleHandle = scheduleMapInit(() => {
+    if (disposed) return;
+    initSylonMap(mapContainer).then((disposeMap) => {
+      if (disposed) disposeMap();
+      else mapCleanup = disposeMap;
+    });
   });
 
   const collapseNode = () => {
@@ -788,6 +798,7 @@ export function initSylonHomeScreen(root, { navigate, showToast }) {
     window.clearTimeout(depthPositionTimer);
     window.clearInterval(clockTimer);
     window.cancelAnimationFrame(pointerFrame);
+    cancelMapInit(mapIdleHandle);
     mapCleanup();
     stateToggle?.removeEventListener('click', onStateToggle);
     unsubscribeMode();

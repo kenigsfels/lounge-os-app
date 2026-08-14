@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-08-14 — отложенная загрузка SYLON Map
+
+- `screens/home.js` теперь запускает `initSylonMap()` через `requestIdleCallback` вместо немедленного вызова при монтировании Home, чтобы загрузка чанка Three.js не конкурировала с первой отрисовкой текста и узлов карты.
+
 ## 2026-08-14 — чистка мёртвого кода SYLON Core
 
 - удалены неиспользуемые `components/sylon-core.js`, `styles/sylon-core.css` и мёртвые CSS-правила старой orbit-модели Home (`.sylon-stage`, `.sylon-modules`, `.sylon-module`, `.sylon-orbit-meter`, `.sylon-core-hint`), оставшиеся после миграции на SYLON Map;
